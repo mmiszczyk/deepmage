@@ -77,21 +77,21 @@
     (setv self.wordsize wordsize))
   (defn get-wordsize [self] self.wordsize)
   ; returns a tuple which contains a chunk index and index of bit in chunk
-  (defn get-bit-coords [self bit_idx]
-    (if (> bit_idx (+ 7 (* 8 self.filesize)))
+  (defn get-bit-coords [self bit-idx]
+    (if (> bit-idx (+ 7 (* 8 self.filesize)))
       (+ 7 (* 8 self.filesize))
-      (, (// bit_idx self.chunksize)
-         (% bit_idx self.chunksize))))
+      (, (// bit-idx self.chunksize)
+         (% bit-idx self.chunksize))))
   ; returns coordinates (see: get-bit-coords) of word's first and last bit
-  (defn get_word_boundaries [self word-idx]
-    (, (.get_bit_coords self (* word-idx self.wordsize))
-       (.get_bit_coords self (- (* (+ word-idx 1) self.wordsize) 1))))
+  (defn get-word-boundaries [self word-idx]
+    (, (.get-bit-coords self (* word-idx self.wordsize))
+       (.get-bit-coords self (- (* (+ word-idx 1) self.wordsize) 1))))
   (defn --getitem-- [self word-number]
     (setv ret [])
     (for-bit-in-word word-number
       (.append ret bit))
     ret)
   (defn --setitem-- [self word-number value]
-    (for-bit-in-word word_number
+    (for-bit-in-word word-number
       (set-bit (get value i))))
   (defn save [self] (ap-each self.chunks (when it.modified (.save it)))))
