@@ -39,9 +39,9 @@
   `(do
     (setv i 0)
     (setv unique (set))
-    (setv end (get (.get_word_boundaries self ~key) 1))
+    (setv end (get (.get-word-boundaries self ~key) 1))
     (ap-each-while
-      (map (fn [x] (.get_bit_coords self x)) (range self.wordsize))
+      (map (fn [x] (.get-bit-coords self x)) (range self.wordsize))
       (and (<= it end) (not (in it unique)))
       (do
         (setv bit (get self.chunks (get it 0) (get it 1)))
@@ -72,26 +72,26 @@
                            chunksize)
                          [i (range self.filesize)])))
     (setv self.wordsize 8))
-  (defn set_wordsize [self wordsize]
+  (defn set-wordsize [self wordsize]
     (when (< wordsize 1) (raise (ValueError "wordsize cannot be smaller than 1!")))
     (setv self.wordsize wordsize))
-  (defn get_wordsize [self] self.wordsize)
+  (defn get-wordsize [self] self.wordsize)
   ; returns a tuple which contains a chunk index and index of bit in chunk
-  (defn get_bit_coords [self bit_idx]
+  (defn get-bit-coords [self bit_idx]
     (if (> bit_idx (+ 7 (* 8 self.filesize)))
       (+ 7 (* 8 self.filesize))
       (, (// bit_idx self.chunksize)
          (% bit_idx self.chunksize))))
-  ; returns coordinates (see: get_bit_coords) of word's first and last bit
-  (defn get_word_boundaries [self word_idx]
-    (, (.get_bit_coords self (* word_idx self.wordsize))
-       (.get_bit_coords self (- (* (+ word_idx 1) self.wordsize) 1))))
-  (defn --getitem-- [self word_number]
+  ; returns coordinates (see: get-bit-coords) of word's first and last bit
+  (defn get_word_boundaries [self word-idx]
+    (, (.get_bit_coords self (* word-idx self.wordsize))
+       (.get_bit_coords self (- (* (+ word-idx 1) self.wordsize) 1))))
+  (defn --getitem-- [self word-number]
     (setv ret [])
-    (for-bit-in-word word_number
+    (for-bit-in-word word-number
       (.append ret bit))
     ret)
-  (defn --setitem-- [self word_number value]
+  (defn --setitem-- [self word-number value]
     (for-bit-in-word word_number
       (set-bit (get value i))))
   (defn save [self] (ap-each self.chunks (when it.modified (.save it)))))
