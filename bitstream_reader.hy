@@ -9,6 +9,7 @@
     (setv self.size size)
     (setv self.loaded False)
     (setv self.modified False)
+    (setv self.in-view False)
     (setv self.contents None))
   (defn load [self]
     (.seek self.file self.offset)
@@ -32,7 +33,38 @@
         (assoc self.contents key value)
         (setv self.modified True)))))
 
-(defmacro for-chunks [form]
+(defmacro for-chunk-in-view [form]
+  `(do
+    (setv begin (->
+                  (.get-word-boundaries self.reader self.begin-idx)
+                  (get 0)
+                  (get 0)))
+    (setv end   (+
+                  (->
+                    (.get-word-boundaries self.reader
+                      (+ self.begin-idx
+                        (.len self.words)))
+                    (get 1)
+                    (get 0))
+                  1))
+    (for [i (range begin end)]
+      (setv chunk (get self.reader.chunks i))
+      ~form)))
+
+(defclass View [object]
+  (defn --init-- [self reader begin-idx words]
+    (setv self.reader reader)
+    (setv self.begin-idx begin-idx)
+    (setv self.words words)
+    (for-chunk-in-view (setv chunk.in-view True)))
+  (defn --getitem-- [self key]
+    (get self.reader (+ begin-idx key)))
+  (defn --setitem-- [self key value]
+    (assoc self.reader (+ begin-idx key) value))
+  (defn unload-view [self]
+    (for-chunk-in-view (setv chunk.in-view False))))
+
+(defmacro for-each-chunk [form]
   `(ap-each self.chunks ~form))
 
 ; do something with every bit in a word:
@@ -74,7 +106,8 @@
                            (* i chunksize)
                            chunksize)
                          [i (range self.filesize)])))
-    (setv self.wordsize 8))
+    (setv self.wordsize 8)
+    (setv self.current-view None))
   (defn set-wordsize [self wordsize]
     (when (< wordsize 1) (raise (ValueError "wordsize cannot be smaller than 1!")))
     (setv self.wordsize wordsize))
@@ -97,5 +130,22 @@
   (defn --setitem-- [self word-number value]
     (for-bit-in-word word-number
       (set-bit (get value i))))
-  (defn save [self]  (for-chunks (when it.modified   (.save it))))
-  (defn purge [self] (for-chunks (unless it.modified (.unload it)))))
+  (defn save [self]  (for-each-chunk
+                       (when
+                         it.modified
+                         (.save it))))
+  (defn purge [self] (for-each-chunk
+                       (unless
+                         (or it.modified it.in-view)
+                         (.unload it))))
+  (defn get-view [self first-word-idx number-of-words]
+    (when self.view (.unload-view self.view))
+    (setv self.view (View
+      self
+      first-word-idx
+      (list-comp
+        (get self word-number)
+        [word-number
+          (range first-word-idx
+            (+ first-word-idx number-of-words 1))])))
+    self.view))
