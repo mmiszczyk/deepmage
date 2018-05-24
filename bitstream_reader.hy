@@ -43,7 +43,7 @@
                   (->
                     (.get-word-boundaries self.reader
                       (+ self.begin-idx
-                        (.len self.words)))
+                        (len self.words)))
                     (get 1)
                     (get 0))
                   1))
@@ -107,7 +107,7 @@
                            chunksize)
                          [i (range self.filesize)])))
     (setv self.wordsize 8)
-    (setv self.current-view None))
+    (setv self.view None))
   (defn set-wordsize [self wordsize]
     (when (< wordsize 1) (raise (ValueError "wordsize cannot be smaller than 1!")))
     (setv self.wordsize wordsize))

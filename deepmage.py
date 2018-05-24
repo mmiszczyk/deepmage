@@ -13,6 +13,7 @@ with open('a.bin', 'r+b') as f:
         x[0] = [False, True, False, False, False, False, True, False]
         screen.print_at(str(x[0]), 0, 0)
         x.save()
+        x.get_view(0,8)
         screen.refresh()
         sleep(1)
 
