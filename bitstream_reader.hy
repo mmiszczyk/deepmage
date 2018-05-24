@@ -32,6 +32,9 @@
         (assoc self.contents key value)
         (setv self.modified True)))))
 
+(defmacro for-chunks [form]
+  `(ap-each self.chunks ~form))
+
 ; do something with every bit in a word:
 ; current bit can be accessed with the 'bit' symbol
 ; and modified with the '(set-bit value)' macro
@@ -94,4 +97,5 @@
   (defn --setitem-- [self word-number value]
     (for-bit-in-word word-number
       (set-bit (get value i))))
-  (defn save [self] (ap-each self.chunks (when it.modified (.save it)))))
+  (defn save [self]  (for-chunks (when it.modified   (.save it))))
+  (defn purge [self] (for-chunks (unless it.modified (.unload it)))))
