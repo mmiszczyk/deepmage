@@ -48,6 +48,7 @@ with open('a.bin', 'r+b') as f:
                                                 screen.width)
         lines = screen.height - 2  # 1 line for header and 1 for footer
         view = reader.get_view(0, lines * words_in_line)
+        cursor = (0, 0)
         representation = bit_representation if mode == BIT_MODE else hex_representation
 
         screen.print_at(make_header_text(f.name, screen.width),
@@ -59,7 +60,9 @@ with open('a.bin', 'r+b') as f:
             pos = 0
             for word_number in range(words_in_line):
                 screen.print_at(representation(view[line_number*words_in_line+word_number]),
-                                pos, line_number+1)
+                                pos, line_number+1,
+                                attr=Screen.A_REVERSE if (word_number == cursor[0] and line_number == cursor[1])
+                                else Screen.A_NORMAL)
                 pos += chars_per_word
                 screen.print_at(' ', pos, line_number+1)
                 pos += 1
@@ -68,7 +71,6 @@ with open('a.bin', 'r+b') as f:
             if screen.has_resized():
                 screen = Screen.wrapper(main_loop)
                 screen.clear()
-            # screen.print_at(str(words_in_line), 0, 0)
             screen.refresh()
 
     Screen.wrapper(main_loop)
