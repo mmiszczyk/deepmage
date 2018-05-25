@@ -79,9 +79,10 @@
   `(do
     (setv i 0)
     (setv unique (set))
+    (setv startbit (* self.wordsize ~key))
     (setv end (get (.get-word-boundaries self ~key) 1))
     (ap-each-while
-      (map (fn [x] (.get-bit-coords self x)) (range self.wordsize))
+      (map (fn [x] (.get-bit-coords self x)) (range startbit (+ startbit self.wordsize )))
       (and (<= it end) (not (in it unique)))
       (do
         (setv bit (get self.chunks (get it 0) (get it 1)))
@@ -121,8 +122,8 @@
   (defn get-bit-coords [self bit-idx]
     (if (> bit-idx (+ 7 (* 8 self.filesize)))
       (+ 7 (* 8 self.filesize))
-      (, (// bit-idx self.chunksize)
-         (% bit-idx self.chunksize))))
+      (, (// bit-idx (* 8 self.chunksize))
+         (% bit-idx (* 8 self.chunksize)))))
   ; returns coordinates (see: get-bit-coords) of word's first and last bit
   (defn get-word-boundaries [self word-idx]
     (, (.get-bit-coords self (* word-idx self.wordsize))
