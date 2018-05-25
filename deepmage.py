@@ -3,7 +3,6 @@ from asciimatics.screen import Screen
 import hy
 import bitstream_reader
 import bitstring
-import itertools
 
 BIT_MODE = 1
 HEX_MODE = 4
