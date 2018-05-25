@@ -57,10 +57,16 @@
     (setv self.begin-idx begin-idx)
     (setv self.words words)
     (for-chunk-in-view (setv chunk.in-view True)))
+  (defn bounds-check [self key]
+    (unless (< key (len self.words))
+      (raise (IndexError
+        (.format "Trying to access element {0} of a {0}-element view" key (len self.words))))))
   (defn --getitem-- [self key]
-    (get self.reader (+ begin-idx key)))
+    (.bounds-check self key)
+    (get self.reader (+ self.begin-idx key)))
   (defn --setitem-- [self key value]
-    (assoc self.reader (+ begin-idx key) value))
+    (.bounds-check self key)
+    (assoc self.reader (+ self.begin-idx key) value))
   (defn unload-view [self]
     (for-chunk-in-view (setv chunk.in-view False))))
 
