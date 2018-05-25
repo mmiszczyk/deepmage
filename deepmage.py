@@ -27,6 +27,15 @@ def calculate_words_in_line(chars_per_word, screen_width):
                (chars_per_word + 1))  # 1 char for a separator
 
 
+def make_header_text(text, width):
+    if len(text) == width:
+        return text
+    if len(text) > width:
+        return text[:width-3] + '...'
+    pad = ' ' * ((width - len(text))//2)
+    return pad + text + pad
+
+
 # TODO: open file provided by user
 with open('a.bin', 'r+b') as f:
     reader = bitstream_reader.FileReader(f, 1024)
@@ -40,6 +49,11 @@ with open('a.bin', 'r+b') as f:
         lines = screen.height - 2  # 1 line for header and 1 for footer
         view = reader.get_view(0, lines * words_in_line)
         representation = bit_representation if mode == BIT_MODE else hex_representation
+
+        screen.print_at(make_header_text(f.name, screen.width),
+                        0, 0,
+                        Screen.COLOUR_CYAN,
+                        Screen.A_BOLD and Screen.A_REVERSE)
 
         for line_number in range(lines):
             pos = 0
