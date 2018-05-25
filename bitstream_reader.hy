@@ -39,14 +39,13 @@
                   (.get-word-boundaries self.reader self.begin-idx)
                   (get 0)
                   (get 0)))
-    (setv end   (+
-                  (->
+    (setv end   (->
                     (.get-word-boundaries self.reader
                       (+ self.begin-idx
                         (len self.words)))
                     (get 1)
                     (get 0))
-                  1))
+                  )
     (for [i (range begin end)]
       (setv chunk (get self.reader.chunks i))
       ~form)))
@@ -60,7 +59,7 @@
   (defn bounds-check [self key]
     (unless (< key (len self.words))
       (raise (IndexError
-        (.format "Trying to access element {0} of a {0}-element view" key (len self.words))))))
+        (.format "Trying to access element {0} of a {1}-element view" key (len self.words))))))
   (defn --getitem-- [self key]
     (.bounds-check self key)
     (get self.reader (+ self.begin-idx key)))
@@ -153,5 +152,5 @@
         (get self word-number)
         [word-number
           (range first-word-idx
-            (+ first-word-idx number-of-words 1))])))
+            (+ first-word-idx number-of-words))])))
     self.view))
