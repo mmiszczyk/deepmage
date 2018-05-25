@@ -43,34 +43,52 @@ with open('a.bin', 'r+b') as f:
 
     # TODO: actual hex editor
     def main_loop(screen):
-        chars_per_word = reader.get_wordsize() // mode
-        words_in_line = calculate_words_in_line(chars_per_word,
-                                                screen.width)
-        lines = screen.height - 2  # 1 line for header and 1 for footer
-        view = reader.get_view(0, lines * words_in_line)
         cursor = (0, 0)
-        representation = bit_representation if mode == BIT_MODE else hex_representation
-
-        screen.print_at(make_header_text(f.name, screen.width),
-                        0, 0,
-                        Screen.COLOUR_CYAN,
-                        Screen.A_BOLD and Screen.A_REVERSE)
-
-        for line_number in range(lines):
-            pos = 0
-            for word_number in range(words_in_line):
-                screen.print_at(representation(view[line_number*words_in_line+word_number]),
-                                pos, line_number+1,
-                                attr=Screen.A_REVERSE if (word_number == cursor[0] and line_number == cursor[1])
-                                else Screen.A_NORMAL)
-                pos += chars_per_word
-                screen.print_at(' ', pos, line_number+1)
-                pos += 1
-
         while True:
-            if screen.has_resized():
-                screen = Screen.wrapper(main_loop)
-                screen.clear()
-            screen.refresh()
+            chars_per_word = reader.get_wordsize() // mode
+            words_in_line = calculate_words_in_line(chars_per_word,
+                                                    screen.width)
+            lines = screen.height - 2  # 1 line for header and 1 for footer
+            view = reader.get_view(0, lines * words_in_line)
+            representation = bit_representation if mode == BIT_MODE else hex_representation
+
+            screen.print_at(make_header_text(f.name, screen.width),
+                            0, 0,
+                            Screen.COLOUR_CYAN,
+                            Screen.A_BOLD and Screen.A_REVERSE)
+
+            for line_number in range(lines):
+                pos = 0
+                for word_number in range(words_in_line):
+                    screen.print_at(representation(view[line_number*words_in_line+word_number]),
+                                    pos, line_number+1,
+                                    attr=Screen.A_REVERSE if (word_number == cursor[0] and line_number == cursor[1])
+                                    else Screen.A_NORMAL)
+                    pos += chars_per_word
+                    screen.print_at(' ', pos, line_number+1)
+                    pos += 1
+
+            while True:
+                if screen.has_resized():
+                    screen = Screen.wrapper(main_loop)
+                    screen.clear()
+                screen.refresh()
+                e = screen.get_event()
+                if e is None:
+                    continue
+                k = e.key_code
+                if k == Screen.KEY_RIGHT:
+                    cursor = cursor[0]+1, cursor[1]
+                elif k == Screen.KEY_LEFT:
+                    cursor = cursor[0]-1, cursor[1]
+                elif k == Screen.KEY_DOWN:
+                    cursor = cursor[0], cursor[1] + 1
+                elif k == Screen.KEY_UP:
+                    cursor = cursor[0], cursor[1] - 1
+                if cursor[0] >= words_in_line:
+                    cursor = 0, cursor[1] + 1
+                if cursor[0] < 0:
+                    cursor = words_in_line - 1, cursor[1] - 1
+                break
 
     Screen.wrapper(main_loop)
