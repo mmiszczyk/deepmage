@@ -154,10 +154,7 @@
                          (or it.modified it.in-view)
                          (.unload it))))
   (defn get-view [self first-word-idx number-of-words]
-    (when self.view
-      (do
-        (.unload-view self.view)
-        (.purge self)))
+    (when self.view (.unload-view self.view))
     (setv self.view (View
       self
       first-word-idx
@@ -166,4 +163,5 @@
         [word-number
           (range first-word-idx
             (+ first-word-idx number-of-words))])))
+    (.purge self)
     self.view))
