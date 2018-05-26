@@ -1,5 +1,6 @@
 import math
 from asciimatics.screen import Screen
+from asciimatics.event import KeyboardEvent
 
 import hy
 import bitstream_reader
@@ -93,7 +94,7 @@ with open('a.bin', 'r+b') as f:
                     screen.clear()
                 screen.refresh()
                 e = screen.get_event()
-                if e is None:
+                if e is None or type(e) != KeyboardEvent:
                     continue
                 k = e.key_code
                 if (k == Screen.KEY_RIGHT) and cursor_at_word < total_words - 1:
