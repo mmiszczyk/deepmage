@@ -25,7 +25,9 @@
     (setv self.modified False))
   (defn --getitem-- [self key]
     (unless self.loaded (.load self))
-    (get self.contents key))
+    (try
+      (get self.contents key)
+      (except [IndexError] None)))
   (defn --setitem-- [self key value]
     (unless self.loaded (.load self))
     (unless (= value (get self.contents key))
@@ -118,12 +120,19 @@
     (when (< wordsize 1) (raise (ValueError "wordsize cannot be smaller than 1!")))
     (setv self.wordsize wordsize))
   (defn get-wordsize [self] self.wordsize)
-  ; returns a tuple which contains a chunk index and index of bit in chunk
-  (defn get-bit-coords [self bit-idx]
+  (defn get-wordcount [self]
+    (// (* 8 self.filesize) self.wordsize))
+  (defn stop-at-last-bit [self bit-idx]
     (if (> bit-idx (+ 7 (* 8 self.filesize)))
       (+ 7 (* 8 self.filesize))
-      (, (// bit-idx (* 8 self.chunksize))
-         (% bit-idx (* 8 self.chunksize)))))
+      bit-idx))
+  ; returns a tuple which contains a chunk index and index of bit in chunk
+  (defn get-bit-coords [self bit-idx]
+    (->
+      (map self.stop-at-last-bit
+        (, (// bit-idx (* 8 self.chunksize))
+           (% bit-idx (* 8 self.chunksize))))
+      (tuple)))
   ; returns coordinates (see: get-bit-coords) of word's first and last bit
   (defn get-word-boundaries [self word-idx]
     (, (.get-bit-coords self (* word-idx self.wordsize))
@@ -131,7 +140,7 @@
   (defn --getitem-- [self word-number]
     (setv ret [])
     (for-bit-in-word word-number
-      (.append ret bit))
+      (unless (= bit None) (.append ret bit)))
     ret)
   (defn --setitem-- [self word-number value]
     (for-bit-in-word word-number

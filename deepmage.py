@@ -45,11 +45,14 @@ with open('a.bin', 'r+b') as f:
         mode = HEX_MODE
         cursor = (0, 0)
         starting_word = 0
+        reader.set_wordsize(8)
         while True:
             chars_per_word = reader.get_wordsize() // mode
             words_in_line = calculate_words_in_line(chars_per_word,
                                                     screen.width)
             lines = screen.height - 2  # 1 line for header and 1 for footer
+            starting_word = max(starting_word, 0)
+            starting_word = min(starting_word, reader.get_wordcount() - (lines * words_in_line))
             view = reader.get_view(starting_word, lines * words_in_line)
             representation = bit_representation if mode == BIT_MODE else hex_representation
 
