@@ -76,7 +76,7 @@ with open('a.bin', 'r+b') as f:
                 for word_number in range(words_in_line):
                     current_word = line_number * words_in_line + word_number
                     if current_word + starting_word >= total_words:
-                        # screen.print_at((' ' * mode) + ' ', pos, line_number)
+                        screen.print_at((' ' * mode), pos, line_number + 1)
                         pass
                     else:
                         screen.print_at(representation(view[current_word]),
