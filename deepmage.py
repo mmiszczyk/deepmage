@@ -56,30 +56,33 @@ with open('a.bin', 'r+b') as f:
                                                     screen.width)
             lines = screen.height - 2  # 1 line for header and 1 for footer
             total_words = reader.get_wordcount()
+            words_in_view = lines * words_in_line
+            starting_word = min(starting_word, total_words - words_in_view + (starting_word % words_in_view))
             starting_word = max(starting_word, 0)
-            starting_word = min(starting_word, total_words - (lines * words_in_line))
-            view = reader.get_view(starting_word, lines * words_in_line)
+            print(starting_word)
+            view = reader.get_view(starting_word, words_in_view)
             representation = bit_representation if mode == BIT_MODE else hex_representation
 
             screen.print_at(make_header_text(f.name, screen.width),
                             0, 0,
                             Screen.COLOUR_CYAN,
                             Screen.A_BOLD and Screen.A_REVERSE)
+            cursor_at_word = starting_word + (cursor[1] * words_in_line) + cursor[0]
+            screen.print_at(('{}/{}' + ' ' * screen.width).format(
+                cursor_at_word + 1, total_words), 0, screen.height - 1)
 
             for line_number in range(lines):
                 pos = 0
                 for word_number in range(words_in_line):
                     current_word = line_number * words_in_line + word_number
-                    if current_word >= total_words:
-                        break
-                    screen.print_at(('{}/{}' + ' ' * screen.width).format(starting_word +
-                                                                          (cursor[1] * words_in_line) +
-                                                                          cursor[0] + 1, total_words), 0,
-                                    screen.height - 1)
-                    screen.print_at(representation(view[current_word]),
-                                    pos, line_number + 1,
-                                    attr=Screen.A_REVERSE if (word_number == cursor[0] and line_number == cursor[1])
-                                    else Screen.A_NORMAL)
+                    if current_word + starting_word >= total_words:
+                        # screen.print_at((' ' * mode) + ' ', pos, line_number)
+                        pass
+                    else:
+                        screen.print_at(representation(view[current_word]),
+                                        pos, line_number + 1,
+                                        attr=Screen.A_REVERSE if (word_number == cursor[0] and line_number == cursor[1])
+                                        else Screen.A_NORMAL)
                     pos += chars_per_word
                     screen.print_at(' ', pos, line_number + 1)
                     pos += 1
@@ -93,13 +96,13 @@ with open('a.bin', 'r+b') as f:
                 if e is None:
                     continue
                 k = e.key_code
-                if k == Screen.KEY_RIGHT:
+                if (k == Screen.KEY_RIGHT) and cursor_at_word < total_words - 1:
                     cursor = cursor[0] + 1, cursor[1]
-                elif k == Screen.KEY_LEFT:
+                elif (k == Screen.KEY_LEFT) and cursor_at_word > 0:
                     cursor = cursor[0] - 1, cursor[1]
-                elif k == Screen.KEY_DOWN:
+                elif (k == Screen.KEY_DOWN) and cursor_at_word < total_words - words_in_line:
                     cursor = cursor[0], cursor[1] + 1
-                elif k == Screen.KEY_UP:
+                elif (k == Screen.KEY_UP) and cursor_at_word > words_in_line - 1:
                     cursor = cursor[0], cursor[1] - 1
                 if cursor[0] >= words_in_line:
                     cursor = 0, cursor[1] + 1
