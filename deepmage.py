@@ -45,7 +45,10 @@ def make_header_text(text, width):
 with open('a.bin', 'r+b') as f:
     reader = bitstream_reader.FileReader(f, 1024)
 
-    # TODO: actual hex editor
+    # TODO: modifying file contents
+    # TODO: redesign loop for performance (don't redraw everything if we don't have to)
+    # TODO: keyboard shortcuts for switching hex/bin mode, changing word size, saving, quitting
+    # TODO: catch KeyboardInterrupt
     def main_loop(screen):
         mode = HEX_MODE
         cursor = (0, 0)
