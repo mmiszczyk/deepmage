@@ -1,3 +1,4 @@
+import math
 from asciimatics.screen import Screen
 
 import hy
@@ -15,7 +16,8 @@ def hex_representation(word):
         split = [word[i:i+4] for i in range(0, len(word), 4)]
         split[-1] = ([False] * (4-len(split[-1]))) + split[-1]
         ret = [bit for hex_digit in split for bit in hex_digit]
-    return bitstring.BitString(ret).hex
+    ret = bitstring.BitString(ret).hex
+    return ret if len(ret) == 2 else '0' + ret
 
 
 def bit_representation(word):
@@ -47,7 +49,7 @@ with open('a.bin', 'r+b') as f:
         starting_word = 0
         reader.set_wordsize(8)
         while True:
-            chars_per_word = reader.get_wordsize() // mode
+            chars_per_word = math.ceil(reader.get_wordsize() / mode)
             words_in_line = calculate_words_in_line(chars_per_word,
                                                     screen.width)
             lines = screen.height - 2  # 1 line for header and 1 for footer
