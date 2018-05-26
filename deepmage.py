@@ -63,7 +63,6 @@ with open('a.bin', 'r+b') as f:
             words_in_view = lines * words_in_line
             starting_word = min(starting_word, total_words - words_in_view + (starting_word % words_in_view))
             starting_word = max(starting_word, 0)
-            print(starting_word)
             view = reader.get_view(starting_word, words_in_view)
             representation = bit_representation if mode == BIT_MODE else hex_representation
 
