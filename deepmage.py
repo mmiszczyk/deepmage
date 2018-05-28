@@ -104,6 +104,7 @@ class UI(object):
 
     def handle_keyboard_events(self, k):
         old_start = self.starting_word
+        # TODO: cursor class which handles cursor-oriented key events
         if (k == Screen.KEY_RIGHT) and self.cursor_at_word < self.total_words - 1:
             self.old_cursor = self.cursor
             self.cursor = self.cursor[0] + 1, self.cursor[1]
