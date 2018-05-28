@@ -1,10 +1,11 @@
 import math
+import bitstring
 from asciimatics.screen import Screen
 from asciimatics.event import KeyboardEvent
 
 import hy
 import bitstream_reader
-import bitstring
+import cursor
 
 BIT_MODE = 1
 HEX_MODE = 4
