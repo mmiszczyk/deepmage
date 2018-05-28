@@ -90,14 +90,11 @@ class UI(object):
         if self.screen.has_resized():
             self.handle_screen_resize()
             needs_refresh = True
+        if self.old_cursor is not None:
+            self.handle_cursor_move()
+            needs_refresh = True
         if self.view_changed:
             self.draw_view()
-            needs_refresh = True
-        if self.old_cursor is not None:
-            try:
-                self.handle_cursor_move()
-            except IndexError:
-                pass
             needs_refresh = True
         if needs_refresh:
             self.screen.refresh()
