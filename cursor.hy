@@ -22,10 +22,6 @@
         ~(second tup)))
     [tup key-tuples]))
 
-; FIXME: a lot of the edge cases don't work with cursor as separate class
-; they used to work when it was a part of the loop
-; investigate why
-
 (defclass BasicCursor [object]
   (defn --init-- [self ui]
     (setv self.ui ui)
@@ -69,8 +65,8 @@
         (setv self.coords (, (- self.ui.words-in-line 1)
                              (- (get self.coords 1) 1)))])
     (cond
-      [(> (get self.coords 1) self.ui.lines)
-       (do (setv self.ui.starting-word (+ self.ui.starting-words self.ui.words-in-line))
+      [(>= (get self.coords 1) self.ui.lines)
+       (do (setv self.ui.starting-word (+ self.ui.starting-word self.ui.words-in-line))
            (setv self.coords (, (get self.coords 0)
                                 (- self.ui.lines 1))))]
       [(< (get self.coords 1) 0)
@@ -87,4 +83,7 @@
           (+
             (- self.ui.total-words self.ui.words-in-view)
             (% self.ui.starting-word self.ui.words-in-view)))))
-    (if-not (= old-start self.ui.starting-word) (setv self.ui.view-changed True))))
+    (print old-start)
+    (print self.ui.starting-word)
+    (print "----")
+    (unless (= old-start self.ui.starting-word) (setv self.ui.view-changed True))))
