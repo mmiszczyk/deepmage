@@ -1,10 +1,11 @@
 (import [asciimatics.event [KeyboardEvent]])
+(import [asciimatics.screen [Screen]])
 
 (defmacro word-idx [coords]
   `(do
     (+
       (get ~coords 0)
-      (* ui.words-in-line
+      (* self.ui.words-in-line
         (get ~coords 1)))))
 
 (defmacro keymap [&rest key-tuples]
@@ -21,6 +22,10 @@
         ~(second tup)))
     [tup key-tuples]))
 
+; FIXME: a lot of the edge cases don't work with cursor as separate class
+; they used to work when it was a part of the loop
+; investigate why
+
 (defclass BasicCursor [object]
   (defn --init-- [self ui]
     (setv self.ui ui)
@@ -32,7 +37,7 @@
   (defn old-word-idx-in-view [self]
     (word-idx self.old-coords))
   (defn word-idx-in-file [self]
-    (+ ui.starting-word (word-idx self.coords)))
+    (+ self.ui.starting-word (word-idx self.coords)))
   (defn handle-key-event [self k]
     (setv old-start self.ui.starting-word)
     (try
@@ -59,7 +64,7 @@
     (cond
       [(> (get self.coords 0) self.ui.words-in-line)  ; checking the line boundaries
        (setv self.coords (, 0                         ; and handling edge cases
-                            (+ (get self.cursor 1) 1)))]
+                            (+ (get self.coords 1) 1)))]
       [(< (get self.coords 0) 0)
         (setv self.coords (, (- self.ui.words-in-line 1)
                              (- (get self.coords 1) 1)))])
