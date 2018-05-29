@@ -83,7 +83,4 @@
           (+
             (- self.ui.total-words self.ui.words-in-view)
             (% self.ui.starting-word self.ui.words-in-view)))))
-    (print old-start)
-    (print self.ui.starting-word)
-    (print "----")
     (unless (= old-start self.ui.starting-word) (setv self.ui.view-changed True))))
