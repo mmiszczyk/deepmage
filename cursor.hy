@@ -56,13 +56,13 @@
                                 (+ (get self.coords 1) 1)))
            (< (.word-idx-in-file self) (- self.ui.total-words self.ui.words-in-line))]
           [Screen.KEY-UP
-           (setv self.coords , (get self.coords 0)
-                                (- (get self.coords 1) 1))
+           (setv self.coords (, (get self.coords 0)
+                                (- (get self.coords 1) 1)))
            (> (.word-idx-in-file self) (- self.ui.words-in-line 1))])
         k))
       (except [KeyError] (return)))  ; if no keypress was recognized, we return early
     (cond
-      [(> (get self.coords 0) self.ui.words-in-line)  ; checking the line boundaries
+      [(>= (get self.coords 0) self.ui.words-in-line)  ; checking the line boundaries
        (setv self.coords (, 0                         ; and handling edge cases
                             (+ (get self.coords 1) 1)))]
       [(< (get self.coords 0) 0)
