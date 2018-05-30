@@ -82,7 +82,7 @@ class UI(object):
         self.cursor.old_coords = None
 
     def handle_screen_resize(self):
-        self.chars_per_word = math.ceil(reader.get_wordsize() / self.mode)
+        self.chars_per_word = int(math.ceil(reader.get_wordsize() / self.mode))
         self.words_in_line = self.calculate_words_in_line()
         self.lines = self.screen.height - 2  # 1 line for header and 1 for footer
         self.words_in_view = self.lines * self.words_in_line
