@@ -12,6 +12,9 @@ HEX_MODE = 4
 
 
 class UI(object):
+
+    UI_control_keys = {Screen.KEY_F10: lambda self: exit(0)}
+
     def __init__(self, screen, file):
         self.screen = screen
         self.file = file
@@ -97,6 +100,11 @@ class UI(object):
             self.screen.refresh()
 
     def handle_keyboard_events(self, k):
+        try:
+            self.UI_control_keys[k](self)
+            return
+        except KeyError:
+            pass
         self.cursor.handle_key_event(k)
 
     def main_loop_internal(self):
@@ -130,9 +138,8 @@ with open('a.bin', 'r+b') as f:
 
     # TODO: modifying file contents
     # TODO: keyboard shortcuts for switching hex/bin mode, changing word size, saving, quitting
-    # TODO: catch KeyboardInterrupt
     def main_loop(screen):
         UI(screen, f)
 
 
-    Screen.wrapper(main_loop)
+    Screen.wrapper(main_loop, catch_interrupt=True)
