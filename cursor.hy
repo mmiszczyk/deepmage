@@ -34,32 +34,11 @@
     (word-idx self.old-coords))
   (defn word-idx-in-file [self]
     (+ self.ui.starting-word (word-idx self.coords)))
-  (defn handle-key-event [self k]
+  (defn cursor-moved [self]
     (setv old-start self.ui.starting-word)
-    (try
-      ((get
-        (keymap               ; we execute a function corresponding to a key
-          [Screen.KEY-RIGHT   ; if a condition is satisfied
-           (setv self.coords (, (+ (get self.coords 0) 1)
-                                (get self.coords 1)))
-           (< (.word-idx-in-file self) (- self.ui.total-words 1))]
-          [Screen.KEY-LEFT
-           (setv self.coords (, (- (get self.coords 0) 1)
-                                (get self.coords 1)))
-           (> (.word-idx-in-file self) 0)]
-          [Screen.KEY-DOWN
-           (setv self.coords (, (get self.coords 0)
-                                (+ (get self.coords 1) 1)))
-           (< (.word-idx-in-file self) (- self.ui.total-words self.ui.words-in-line))]
-          [Screen.KEY-UP
-           (setv self.coords (, (get self.coords 0)
-                                (- (get self.coords 1) 1)))
-           (> (.word-idx-in-file self) (- self.ui.words-in-line 1))])
-        k))
-      (except [KeyError] (return)))  ; if no keypress was recognized, we return early
     (cond
       [(>= (get self.coords 0) self.ui.words-in-line)  ; checking the line boundaries
-       (setv self.coords (, 0                         ; and handling edge cases
+       (setv self.coords (, 0                          ; and handling edge cases
                             (+ (get self.coords 1) 1)))]
       [(< (get self.coords 0) 0)
         (setv self.coords (, (- self.ui.words-in-line 1)
@@ -81,6 +60,29 @@
       (max 0
         (min self.ui.starting-word
           (+
-            (- self.ui.total-words self.ui.words-in-view)
-            (% self.ui.starting-word self.ui.words-in-view)))))
-    (unless (= old-start self.ui.starting-word) (setv self.ui.view-changed True))))
+            (- self.ui.total-words self.ui.words-in-line)
+            (% self.ui.starting-word self.ui.words-in-line)))))
+    (unless (= old-start self.ui.starting-word) (setv self.ui.view-changed True)))
+  (defn handle-key-event [self k]
+    (try
+      ((get
+        (keymap               ; we execute a function corresponding to a key
+          [Screen.KEY-RIGHT   ; if a condition is satisfied
+           (setv self.coords (, (+ (get self.coords 0) 1)
+                                (get self.coords 1)))
+           (< (.word-idx-in-file self) (- self.ui.total-words 1))]
+          [Screen.KEY-LEFT
+           (setv self.coords (, (- (get self.coords 0) 1)
+                                (get self.coords 1)))
+           (> (.word-idx-in-file self) 0)]
+          [Screen.KEY-DOWN
+           (setv self.coords (, (get self.coords 0)
+                                (+ (get self.coords 1) 1)))
+           (< (.word-idx-in-file self) (- self.ui.total-words self.ui.words-in-line))]
+          [Screen.KEY-UP
+           (setv self.coords (, (get self.coords 0)
+                                (- (get self.coords 1) 1)))
+           (> (.word-idx-in-file self) (- self.ui.words-in-line 1))])
+        k))
+      (except [KeyError] (return)))  ; if no keypress was recognized, we return early
+      (.cursor-moved self)))

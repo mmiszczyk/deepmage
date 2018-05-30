@@ -13,7 +13,8 @@ HEX_MODE = 4
 
 class UI(object):
 
-    UI_control_keys = {Screen.KEY_F10: lambda self: exit(0)}
+    UI_control_keys = {Screen.KEY_F2:  lambda self: self.mode_toggle(),
+                       Screen.KEY_F10: lambda self: exit(0)}
 
     def __init__(self, screen, file):
         self.screen = screen
@@ -24,7 +25,7 @@ class UI(object):
         self.representation = hex_representation
         self.cursor = cursor.BasicCursor(self)
         self.starting_word = 0
-        self.chars_per_word = math.ceil(reader.get_wordsize() / self.mode)
+        self.chars_per_word = int(math.ceil(reader.get_wordsize() / self.mode))
         self.words_in_line = self.calculate_words_in_line()
         self.lines = self.screen.height - 2  # 1 line for header and 1 for footer
         self.total_words = reader.get_wordcount()
@@ -44,7 +45,7 @@ class UI(object):
             for word_number in range(self.words_in_line):
                 current_word = line_number * self.words_in_line + word_number
                 if current_word + self.starting_word >= self.total_words:
-                    self.screen.print_at((' ' * self.mode), pos, line_number + 1)
+                    self.screen.print_at((' ' * self.chars_per_word), pos, line_number + 1)
                 else:
                     self.screen.print_at(self.representation(self.view[current_word]),
                                          pos, line_number + 1)
@@ -67,14 +68,17 @@ class UI(object):
         return pad + self.file.name + pad
 
     def handle_cursor_move(self):
-        self.screen.print_at(('{}/{}' + ' ' * self.screen.width).format(
-            self.cursor.word_idx_in_file() + 1, self.total_words), 0, self.screen.height - 1)
-        self.screen.print_at(self.representation(self.view[self.cursor.old_word_idx_in_view()]),
-                             self.cursor.old_coords[0] * (self.chars_per_word + 1), self.cursor.old_coords[1] + 1,
-                             attr=Screen.A_NORMAL)
-        self.screen.print_at(self.representation(self.view[self.cursor.word_idx_in_view()]),
-                             self.cursor.coords[0] * (self.chars_per_word + 1), self.cursor.coords[1] + 1,
-                             attr=Screen.A_REVERSE)
+        self.screen.print_at(('{}/{} {}' + ' ' * self.screen.width).format(
+            self.cursor.word_idx_in_file() + 1, self.total_words, self.cursor.coords), 0, self.screen.height - 1)
+        try:
+            self.screen.print_at(self.representation(self.view[self.cursor.old_word_idx_in_view()]),
+                                 self.cursor.old_coords[0] * (self.chars_per_word + 1), self.cursor.old_coords[1] + 1,
+                                 attr=Screen.A_NORMAL)
+            self.screen.print_at(self.representation(self.view[self.cursor.word_idx_in_view()]),
+                                 self.cursor.coords[0] * (self.chars_per_word + 1), self.cursor.coords[1] + 1,
+                                 attr=Screen.A_REVERSE)
+        except IndexError:
+            pass
         self.cursor.old_coords = None
 
     def handle_screen_resize(self):
@@ -90,11 +94,11 @@ class UI(object):
         if self.screen.has_resized():
             self.handle_screen_resize()
             needs_refresh = True
-        if self.cursor.old_coords is not None:
-            self.handle_cursor_move()
-            needs_refresh = True
         if self.view_changed:
             self.draw_view()
+            needs_refresh = True
+        if self.cursor.old_coords is not None:
+            self.handle_cursor_move()
             needs_refresh = True
         if needs_refresh:
             self.screen.refresh()
@@ -113,6 +117,18 @@ class UI(object):
             e = self.screen.get_event()
             if type(e) == KeyboardEvent:
                 self.handle_keyboard_events(e.key_code)
+
+    def mode_toggle(self):
+        curr_word = self.cursor.word_idx_in_file()
+        self.view_changed = True
+        self.mode = BIT_MODE if self.mode == HEX_MODE else HEX_MODE
+        self.representation = bit_representation if self.mode == BIT_MODE else hex_representation
+        self.chars_per_word = int(math.ceil(reader.get_wordsize() / self.mode))
+        self.words_in_line = self.calculate_words_in_line()
+        self.cursor.coords = (curr_word % self.words_in_line,
+                              (curr_word // self.words_in_line) % self.lines)
+        self.words_in_view = self.lines * self.words_in_line
+        self.starting_word = curr_word - (curr_word % self.words_in_view)
 
 
 def hex_representation(word):
