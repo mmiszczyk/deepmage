@@ -17,12 +17,10 @@
     (.seek self.file self.offset)
     (setv self.contents (bitstring.BitStream (.read self.file self.size)))
     (setv self.loaded True)
-    (setv self.modified False)
-    (print "loading chunk"))
+    (setv self.modified False))
   (defn unload [self]
     (setv self.loaded False)
-    (setv self.contents None)
-    (print "unloading chunk"))
+    (setv self.contents None))
   (defn save [self]
     (.seek self.file self.offset)
     (.write self.file self.contents.bytes)
