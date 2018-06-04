@@ -10,6 +10,8 @@ import cursor
 BIT_MODE = 1
 HEX_MODE = 4
 
+UNSAVED_CHANGES = "[MODIFIED]"
+
 
 class UI(object):
 
@@ -105,6 +107,8 @@ class UI(object):
         if self.cursor.old_coords is not None:
             self.handle_cursor_move()
             needs_refresh = True
+        if len([x for x in self.reader.chunks if x.modified]):
+            self.screen.print_at(UNSAVED_CHANGES, self.screen.width - len(UNSAVED_CHANGES), self.screen.height-1)
         if needs_refresh:
             self.screen.refresh()
 
@@ -129,10 +133,10 @@ class UI(object):
 
     def main_loop_internal(self):
         while True:
-            self.redraw_if_needed()
             e = self.screen.get_event()
             if type(e) == KeyboardEvent:
                 self.handle_keyboard_events(e.key_code)
+            self.redraw_if_needed()
 
     def mode_toggle(self):
         curr_word = self.cursor.word_idx_in_file()
