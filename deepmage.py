@@ -16,11 +16,14 @@ class UI(object):
     UI_control_keys = {Screen.KEY_F2:  lambda self: self.mode_toggle(),
                        Screen.KEY_F10: lambda self: exit(0)}
 
+    hex_alphabet = {ord(x) for x in '0123456789abcdefABCDEF'}
+    bin_alphabet = {ord(x) for x in '01'}
+
     def __init__(self, screen, file):
         self.screen = screen
         self.file = file
         self.reader = bitstream_reader.FileReader(self.file, 1024)
-        reader.set_wordsize(8)
+        self.reader.set_wordsize(8)
         self.mode = HEX_MODE
         self.representation = hex_representation
         self.cursor = cursor.BasicCursor(self)
@@ -30,8 +33,9 @@ class UI(object):
         self.lines = self.screen.height - 2  # 1 line for header and 1 for footer
         self.total_words = reader.get_wordcount()
         self.words_in_view = self.lines * self.words_in_line
-        self.view = reader.get_view(self.starting_word, self.words_in_view)
+        self.view = None
         self.view_changed = True
+        self.write_buffer = []
         self.screen.print_at(self.make_header_text(),
                              0, 0,
                              Screen.COLOUR_CYAN,
@@ -39,7 +43,7 @@ class UI(object):
         self.main_loop_internal()
 
     def draw_view(self):
-        self.view = reader.get_view(self.starting_word, self.words_in_view)
+        self.view = self.reader.get_view(self.starting_word, self.words_in_view)
         for line_number in range(self.lines):
             pos = 0
             for word_number in range(self.words_in_line):
@@ -82,7 +86,7 @@ class UI(object):
         self.cursor.old_coords = None
 
     def handle_screen_resize(self):
-        self.chars_per_word = int(math.ceil(reader.get_wordsize() / self.mode))
+        self.chars_per_word = int(math.ceil(self.reader.get_wordsize() / self.mode))
         self.words_in_line = self.calculate_words_in_line()
         self.lines = self.screen.height - 2  # 1 line for header and 1 for footer
         self.words_in_view = self.lines * self.words_in_line
@@ -104,12 +108,23 @@ class UI(object):
             self.screen.refresh()
 
     def handle_keyboard_events(self, k):
+        if k in self.hex_alphabet and self.mode == HEX_MODE:
+            self.write_buffer.append(k)
+            if len(self.write_buffer) == self.chars_per_word:
+                bits_to_write = bitstring.ConstBitArray('0x'+''.join([chr(x) for x in self.write_buffer]))
+                self.reader[self.cursor.word_idx_in_file()] = bits_to_write[::-1][:self.reader.get_wordsize()][::-1]
+                self.write_buffer = []
+                self.view_changed = True
+                k = Screen.KEY_RIGHT
+            else:
+                return
         try:
             self.UI_control_keys[k](self)
             return
         except KeyError:
             pass
         self.cursor.handle_key_event(k)
+        self.write_buffer = []
 
     def main_loop_internal(self):
         while True:
@@ -123,7 +138,7 @@ class UI(object):
         self.view_changed = True
         self.mode = BIT_MODE if self.mode == HEX_MODE else HEX_MODE
         self.representation = bit_representation if self.mode == BIT_MODE else hex_representation
-        self.chars_per_word = int(math.ceil(reader.get_wordsize() / self.mode))
+        self.chars_per_word = int(math.ceil(self.reader.get_wordsize() / self.mode))
         self.words_in_line = self.calculate_words_in_line()
         self.cursor.coords = (curr_word % self.words_in_line,
                               (curr_word // self.words_in_line) % self.lines)

@@ -1,4 +1,5 @@
 (import bitstring)
+(import math)
 
 (require [hy.extra.anaphoric [ap-each-while ap-each]])
 
@@ -12,13 +13,16 @@
     (setv self.in-view False)
     (setv self.contents None))
   (defn load [self]
+    (when self.loaded (return))
     (.seek self.file self.offset)
     (setv self.contents (bitstring.BitStream (.read self.file self.size)))
     (setv self.loaded True)
-    (setv self.modified False))
+    (setv self.modified False)
+    (print "loading chunk"))
   (defn unload [self]
     (setv self.loaded False)
-    (setv self.contents None))
+    (setv self.contents None)
+    (print "unloading chunk"))
   (defn save [self]
     (.seek self.file self.offset)
     (.write self.file self.contents.bytes)
@@ -46,7 +50,8 @@
                       (+ self.begin-idx
                         (len self.words)))
                     (get 1)
-                    (get 0))
+                    (get 0)
+                    (+ 1))
                   )
     (for [i (range begin end)]
       (setv chunk (get self.reader.chunks i))
@@ -105,7 +110,7 @@
     (setv self.file file)
     (setv self.filesize (do
                          (.seek file 0 2)
-                         (.tell file)))
+                         (+ 1(.tell file))))
     (setv self.chunksize chunksize)
     (setv self.chunks (do
                        (.seek file 0)
@@ -113,7 +118,7 @@
                          (Chunk file
                            (* i chunksize)
                            chunksize)
-                         [i (range self.filesize)])))
+                         [i (range (math.ceil (/ self.filesize chunksize)))])))
     (setv self.wordsize 8)
     (setv self.view None))
   (defn set-wordsize [self wordsize]
@@ -151,7 +156,7 @@
                          (.save it))))
   (defn purge [self] (for-each-chunk
                        (unless
-                         (or it.modified it.in-view)
+                         (or it.modified it.in-view (not it.loaded))
                          (.unload it))))
   (defn get-view [self first-word-idx number-of-words]
     (when self.view (.unload-view self.view))
