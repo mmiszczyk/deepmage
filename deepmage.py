@@ -14,6 +14,7 @@ HEX_MODE = 4
 class UI(object):
 
     UI_control_keys = {Screen.KEY_F2:  lambda self: self.mode_toggle(),
+                       Screen.KEY_F5:  lambda self: self.reader.save(),
                        Screen.KEY_F10: lambda self: exit(0)}
 
     hex_alphabet = {ord(x) for x in '0123456789abcdefABCDEF'}
@@ -167,8 +168,7 @@ def bit_representation(word):
 with open('a.bin', 'r+b') as f:
     reader = bitstream_reader.FileReader(f, 1024)
 
-    # TODO: modifying file contents
-    # TODO: keyboard shortcuts for switching hex/bin mode, changing word size, saving, quitting
+    # TODO: keyboard shortcuts for changing word size
     def main_loop(screen):
         UI(screen, f)
 
