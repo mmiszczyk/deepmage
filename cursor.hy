@@ -27,7 +27,25 @@
     (setv self.ui ui)
     (setv self.coords (, 0 0))
     (setv self.old-coords self.coords)
-    (setv self.cursor-at-word 0))
+    (setv self.cursor-at-word 0)
+    (setv self.keys
+      (keymap               ; we execute a function corresponding to a key
+          [Screen.KEY-RIGHT   ; if a condition is satisfied
+           (setv self.coords (, (+ (get self.coords 0) 1)
+                                (get self.coords 1)))
+           (< (.word-idx-in-file self) (- self.ui.total-words 1))]
+          [Screen.KEY-LEFT
+           (setv self.coords (, (- (get self.coords 0) 1)
+                                (get self.coords 1)))
+           (> (.word-idx-in-file self) 0)]
+          [Screen.KEY-DOWN
+           (setv self.coords (, (get self.coords 0)
+                                (+ (get self.coords 1) 1)))
+           (< (.word-idx-in-file self) (- self.ui.total-words self.ui.words-in-line))]
+          [Screen.KEY-UP
+           (setv self.coords (, (get self.coords 0)
+                                (- (get self.coords 1) 1)))
+           (> (.word-idx-in-file self) (- self.ui.words-in-line 1))])))
   (defn word-idx-in-view [self]
     (word-idx self.coords))
   (defn old-word-idx-in-view [self]
@@ -65,24 +83,6 @@
     (unless (= old-start self.ui.starting-word) (setv self.ui.view-changed True)))
   (defn handle-key-event [self k]
     (try
-      ((get
-        (keymap               ; we execute a function corresponding to a key
-          [Screen.KEY-RIGHT   ; if a condition is satisfied
-           (setv self.coords (, (+ (get self.coords 0) 1)
-                                (get self.coords 1)))
-           (< (.word-idx-in-file self) (- self.ui.total-words 1))]
-          [Screen.KEY-LEFT
-           (setv self.coords (, (- (get self.coords 0) 1)
-                                (get self.coords 1)))
-           (> (.word-idx-in-file self) 0)]
-          [Screen.KEY-DOWN
-           (setv self.coords (, (get self.coords 0)
-                                (+ (get self.coords 1) 1)))
-           (< (.word-idx-in-file self) (- self.ui.total-words self.ui.words-in-line))]
-          [Screen.KEY-UP
-           (setv self.coords (, (get self.coords 0)
-                                (- (get self.coords 1) 1)))
-           (> (.word-idx-in-file self) (- self.ui.words-in-line 1))])
-        k))
+      ((get self.keys k))
       (except [KeyError] (return)))  ; if no keypress was recognized, we return early
       (.cursor-moved self)))
