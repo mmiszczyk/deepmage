@@ -2,8 +2,6 @@ import math
 import bitstring
 from asciimatics.screen import Screen
 from asciimatics.event import KeyboardEvent
-from asciimatics.widgets import Text, Frame, Layout
-from asciimatics.scene import Scene
 
 import hy
 import bitstream_reader
