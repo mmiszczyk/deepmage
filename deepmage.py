@@ -13,13 +13,14 @@ HEX_MODE = 4
 UNSAVED_CHANGES = "[MODIFIED]"
 WORDSIZE_PROMPT = "New wordsize (in bits): "
 WORDSIZE_HELP   = "<ENTER> confirm | <ESC> cancel"
+KEYS_HELP       = "<F2> Bit/Hex mode | <F3> Change wordsize | <F5> Save | <F10> Exit"
 
 
 class UI(object):
 
     UI_control_keys = {Screen.KEY_F2:  lambda self: self.mode_toggle(),
-                       Screen.KEY_F5:  lambda self: self.reader.save(),
                        Screen.KEY_F3:  lambda self: self.change_wordsize(),
+                       Screen.KEY_F5:  lambda self: self.reader.save(),
                        Screen.KEY_F10: lambda self: exit(0)}
 
     hex_alphabet = {ord(x) for x in '0123456789abcdefABCDEF'}
@@ -36,16 +37,20 @@ class UI(object):
         self.starting_word = 0
         self.chars_per_word = int(math.ceil(self.reader.get_wordsize() / self.mode))
         self.words_in_line = self.calculate_words_in_line()
-        self.lines = self.screen.height - 2  # 1 line for header and 1 for footer
+        self.lines = self.screen.height - 3  # 1 line for header and 2 for footer
         self.total_words = self.reader.get_wordcount()
         self.words_in_view = self.lines * self.words_in_line
         self.view = None
         self.view_changed = True
         self.write_buffer = []
-        self.screen.print_at(self.make_header_text(),
+        self.screen.print_at(self.make_header_text(self.file.name),
                              0, 0,
                              Screen.COLOUR_CYAN,
                              Screen.A_BOLD and Screen.A_REVERSE)
+        self.screen.print_at(self.make_header_text(KEYS_HELP),
+                             0, self.screen.height - 1,
+                             Screen.COLOUR_CYAN,
+                             Screen.A_REVERSE)
         self.main_loop_internal()
 
     def draw_view(self):
@@ -69,17 +74,17 @@ class UI(object):
         return max(1, self.screen.width //
                    (self.chars_per_word + 1))  # 1 char for a separator
 
-    def make_header_text(self):
-        if len(self.file.name) == self.screen.width:
-            return self.file.name
-        if len(self.file.name) > self.screen.width:
-            return self.file.name[:self.screen.width - 3] + '...'
-        pad = ' ' * ((self.screen.width - len(self.file.name)) // 2)
-        return pad + self.file.name + pad
+    def make_header_text(self, text):
+        if len(text) == self.screen.width:
+            return text
+        if len(text) > self.screen.width:
+            return text[:self.screen.width - 3] + '...'
+        pad = ' ' * ((self.screen.width - len(text)) // 2)
+        return pad + text + pad
 
     def handle_cursor_move(self):
         self.screen.print_at(('{}/{} {}' + ' ' * self.screen.width).format(
-            self.cursor.word_idx_in_file() + 1, self.total_words, self.cursor.coords), 0, self.screen.height - 1)
+            self.cursor.word_idx_in_file() + 1, self.total_words, self.cursor.coords), 0, self.screen.height - 2)
         try:
             self.screen.print_at(self.representation(self.view[self.cursor.old_word_idx_in_view()]),
                                  self.cursor.old_coords[0] * (self.chars_per_word + 1), self.cursor.old_coords[1] + 1,
@@ -111,7 +116,7 @@ class UI(object):
             self.handle_cursor_move()
             needs_refresh = True
         if len([x for x in self.reader.chunks if x.modified]):
-            self.screen.print_at(UNSAVED_CHANGES, self.screen.width - len(UNSAVED_CHANGES), self.screen.height-1)
+            self.screen.print_at(UNSAVED_CHANGES, self.screen.width - len(UNSAVED_CHANGES), self.screen.height-2)
         if needs_refresh:
             self.screen.refresh()
 
@@ -155,8 +160,8 @@ class UI(object):
 
     # TODO: overwrite 'leftover' text when making weird wordsizes and screen real estate becomes unused
     def change_wordsize(self):
-        self.screen.print_at(WORDSIZE_PROMPT, 0, self.screen.height - 1)
-        self.screen.print_at(WORDSIZE_HELP, self.screen.width - len(WORDSIZE_HELP), self.screen.height - 1)
+        self.screen.print_at(WORDSIZE_PROMPT, 0, self.screen.height - 2)
+        self.screen.print_at(WORDSIZE_HELP, self.screen.width - len(WORDSIZE_HELP), self.screen.height - 2)
         self.screen.refresh()
         buffer = []
         while True:
@@ -178,13 +183,13 @@ class UI(object):
             except ValueError:
                 k = e.key_code
                 if k == Screen.KEY_BACK or k == Screen.KEY_DELETE or k == Screen.KEY_LEFT:
-                    self.screen.print_at(' ', len(WORDSIZE_PROMPT) + len(buffer) - 1, self.screen.height - 1)
+                    self.screen.print_at(' ', len(WORDSIZE_PROMPT) + len(buffer) - 1, self.screen.height - 2)
                     buffer = buffer[:-1]
                 elif k == Screen.KEY_ESCAPE:
-                    self.screen.print_at(' ' * self.screen.width, 0, self.screen.height-1)
+                    self.screen.print_at(' ' * self.screen.width, 0, self.screen.height-2)
                     self.screen.refresh()
                     break
-            self.screen.print_at(buffer, len(WORDSIZE_PROMPT), self.screen.height-1)
+            self.screen.print_at(buffer, len(WORDSIZE_PROMPT), self.screen.height-2)
             self.screen.refresh()
 
 
