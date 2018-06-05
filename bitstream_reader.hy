@@ -39,27 +39,28 @@
 
 (defmacro for-chunk-in-view [form]
   `(do
-    (setv begin (->
-                  (.get-word-boundaries self.reader self.begin-idx)
-                  (get 0)
-                  (get 0)))
-    (setv end   (->
-                    (.get-word-boundaries self.reader
-                      (+ self.begin-idx
-                        (len self.words)))
-                    (get 1)
+    (unless self.chunks
+      (setv begin (->
+                    (.get-word-boundaries self.reader self.begin-idx)
                     (get 0)
-                    (+ 1))
-                  )
-    (for [i (range begin end)]
-      (setv chunk (get self.reader.chunks i))
-      ~form)))
+                    (get 0)))
+      (setv end   (->
+                      (.get-word-boundaries self.reader
+                        (+ self.begin-idx
+                          (len self.words)))
+                      (get 1)
+                      (get 0)
+                      (+ 1)))
+      (for [i (range begin end)]
+        (.append self.chunks (get self.reader.chunks i))))
+      (for [chunk self.chunks] ~form)))
 
 (defclass View [object]
   (defn --init-- [self reader begin-idx words]
     (setv self.reader reader)
     (setv self.begin-idx begin-idx)
     (setv self.words words)
+    (setv self.chunks [])
     (for-chunk-in-view (setv chunk.in-view True)))
   (defn bounds-check [self key]
     (unless (< key (len self.words))

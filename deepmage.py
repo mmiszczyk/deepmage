@@ -2,6 +2,8 @@ import math
 import bitstring
 from asciimatics.screen import Screen
 from asciimatics.event import KeyboardEvent
+from asciimatics.widgets import Text, Frame, Layout
+from asciimatics.scene import Scene
 
 import hy
 import bitstream_reader
@@ -11,12 +13,15 @@ BIT_MODE = 1
 HEX_MODE = 4
 
 UNSAVED_CHANGES = "[MODIFIED]"
+WORDSIZE_PROMPT = "New wordsize (in bits): "
+WORDSIZE_HELP   = "<ENTER> confirm | <ESC> cancel"
 
 
 class UI(object):
 
     UI_control_keys = {Screen.KEY_F2:  lambda self: self.mode_toggle(),
                        Screen.KEY_F5:  lambda self: self.reader.save(),
+                       Screen.KEY_F3:  lambda self: self.change_wordsize(),
                        Screen.KEY_F10: lambda self: exit(0)}
 
     hex_alphabet = {ord(x) for x in '0123456789abcdefABCDEF'}
@@ -31,10 +36,10 @@ class UI(object):
         self.representation = hex_representation
         self.cursor = cursor.BasicCursor(self)
         self.starting_word = 0
-        self.chars_per_word = int(math.ceil(reader.get_wordsize() / self.mode))
+        self.chars_per_word = int(math.ceil(self.reader.get_wordsize() / self.mode))
         self.words_in_line = self.calculate_words_in_line()
         self.lines = self.screen.height - 2  # 1 line for header and 1 for footer
-        self.total_words = reader.get_wordcount()
+        self.total_words = self.reader.get_wordcount()
         self.words_in_view = self.lines * self.words_in_line
         self.view = None
         self.view_changed = True
@@ -150,6 +155,40 @@ class UI(object):
         self.words_in_view = self.lines * self.words_in_line
         self.starting_word = curr_word - (curr_word % self.words_in_view)
 
+    # TODO: overwrite 'leftover' text when making weird wordsizes and screen real estate becomes unused
+    def change_wordsize(self):
+        self.screen.print_at(WORDSIZE_PROMPT, 0, self.screen.height - 1)
+        self.screen.print_at(WORDSIZE_HELP, self.screen.width - len(WORDSIZE_HELP), self.screen.height - 1)
+        self.screen.refresh()
+        buffer = []
+        while True:
+            e = self.screen.get_event()
+            if e is None or type(e) != KeyboardEvent:
+                continue
+            try:
+                c = chr(e.key_code)
+                if c in [x for x in '1234567890']:
+                    buffer.append(c)
+                if c in [x for x in '\r\n']:
+                    self.reader.set_wordsize(int(''.join(buffer)))
+                    self.chars_per_word = int(math.ceil(self.reader.get_wordsize() / self.mode))
+                    self.words_in_line = self.calculate_words_in_line()
+                    self.total_words = self.reader.get_wordcount()
+                    self.words_in_view = self.lines * self.words_in_line
+                    self.view_changed = True
+                    break
+            except ValueError:
+                k = e.key_code
+                if k == Screen.KEY_BACK or k == Screen.KEY_DELETE or k == Screen.KEY_LEFT:
+                    self.screen.print_at(' ', len(WORDSIZE_PROMPT) + len(buffer) - 1, self.screen.height - 1)
+                    buffer = buffer[:-1]
+                elif k == Screen.KEY_ESCAPE:
+                    self.screen.print_at(' ' * self.screen.width, 0, self.screen.height-1)
+                    self.screen.refresh()
+                    break
+            self.screen.print_at(buffer, len(WORDSIZE_PROMPT), self.screen.height-1)
+            self.screen.refresh()
+
 
 def hex_representation(word):
     if word is None or len(word) == 0:
@@ -161,7 +200,7 @@ def hex_representation(word):
         split[-1] = ([False] * (4 - len(split[-1]))) + split[-1]
         ret = [bit for hex_digit in split for bit in hex_digit]
     ret = bitstring.BitString(ret).hex
-    return ret if len(ret) == 2 else '0' + ret
+    return ret # if len(ret) == 2 else '0' + ret
 
 
 def bit_representation(word):
@@ -170,7 +209,6 @@ def bit_representation(word):
 
 # TODO: open file provided by user
 with open('a.bin', 'r+b') as f:
-    reader = bitstream_reader.FileReader(f, 1024)
 
     # TODO: keyboard shortcuts for changing word size
     def main_loop(screen):
