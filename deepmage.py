@@ -198,7 +198,7 @@ def hex_representation(word):
         split[-1] = ([False] * (4 - len(split[-1]))) + split[-1]
         ret = [bit for hex_digit in split for bit in hex_digit]
     ret = bitstring.BitString(ret).hex
-    return ret # if len(ret) == 2 else '0' + ret
+    return ret
 
 
 def bit_representation(word):
@@ -208,7 +208,6 @@ def bit_representation(word):
 # TODO: open file provided by user
 with open('a.bin', 'r+b') as f:
 
-    # TODO: keyboard shortcuts for changing word size
     def main_loop(screen):
         UI(screen, f)
 
