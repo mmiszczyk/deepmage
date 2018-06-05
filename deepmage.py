@@ -197,8 +197,7 @@ def hex_representation(word):
         split = [word[i:i + 4] for i in range(0, len(word), 4)]
         split[-1] = ([False] * (4 - len(split[-1]))) + split[-1]
         ret = [bit for hex_digit in split for bit in hex_digit]
-    ret = bitstring.BitString(ret).hex
-    return ret
+    return bitstring.BitString(ret).hex
 
 
 def bit_representation(word):
