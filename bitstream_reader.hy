@@ -117,7 +117,7 @@
                          (Chunk file
                            (* i chunksize)
                            chunksize)
-                         [i (range (math.ceil (/ self.filesize chunksize)))])))
+                         [i (range (int (math.ceil (/ self.filesize chunksize))))])))
     (setv self.wordsize 8)
     (setv self.view None))
   (defn set-wordsize [self wordsize]
