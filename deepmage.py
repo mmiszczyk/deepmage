@@ -6,6 +6,7 @@ from asciimatics.event import KeyboardEvent
 import hy
 import bitstream_reader
 import cursor
+import argparse
 
 BIT_MODE = 1
 HEX_MODE = 4
@@ -209,8 +210,12 @@ def bit_representation(word):
     return bitstring.BitString(word).bin
 
 
-# TODO: open file provided by user
-with open('a.bin', 'r+b') as f:
+parser = argparse.ArgumentParser("deepmage")
+parser.add_argument('filename', metavar='file', type=str, help='Path to a file to edit')
+args = parser.parse_args()
+
+
+with open(args.filename, 'r+b') as f:
 
     def main_loop(screen):
         UI(screen, f)
