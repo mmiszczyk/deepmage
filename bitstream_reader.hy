@@ -110,7 +110,7 @@
     (setv self.file file)
     (setv self.filesize (do
                          (.seek file 0 2)
-                         (+ 1(.tell file))))
+                         (.tell file)))
     (setv self.chunksize chunksize)
     (setv self.chunks (do
                        (.seek file 0)
