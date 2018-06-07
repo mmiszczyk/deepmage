@@ -68,6 +68,8 @@ class UI(object):
                 pos += self.chars_per_word
                 self.screen.print_at(' ', pos, line_number + 1)
                 pos += 1
+                if pos < self.screen.width - 1:
+                    self.screen.print_at(' ' * (self.screen.width - pos - 1), pos, line_number + 1)
         self.view_changed = False
         self.cursor.old_coords = self.cursor.coords
 
@@ -159,7 +161,6 @@ class UI(object):
         self.words_in_view = self.lines * self.words_in_line
         self.starting_word = curr_word - (curr_word % self.words_in_view)
 
-    # TODO: overwrite 'leftover' text when making weird wordsizes and screen real estate becomes unused
     def change_wordsize(self):
         self.screen.print_at(WORDSIZE_PROMPT, 0, self.screen.height - 2)
         self.screen.print_at(WORDSIZE_HELP, self.screen.width - len(WORDSIZE_HELP), self.screen.height - 2)
