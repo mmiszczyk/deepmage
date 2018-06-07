@@ -45,7 +45,13 @@
           [Screen.KEY-UP
            (setv self.coords (, (get self.coords 0)
                                 (- (get self.coords 1) 1)))
-           (> (.word-idx-in-file self) (- self.ui.words-in-line 1))])))
+           (> (.word-idx-in-file self) (- self.ui.words-in-line 1))]
+           [Screen.KEY-HOME
+            (setv self.coords (, 0
+                                 (get self.coords 1)))]
+           [Screen.KEY-END
+            (setv self.coords (, (- self.ui.words-in-line 1)
+                                 (get self.coords 1)))])))
   (defn word-idx-in-view [self]
     (word-idx self.coords))
   (defn old-word-idx-in-view [self]
@@ -74,6 +80,9 @@
                0))
            (setv self.coords (, (get self.coords 0)
                                 0)))])
+    (when (>  (.word-idx-in-file self) self.ui.total-words)
+      (setv self.coords (, (- (% self.ui.total-words self.ui.words-in-line) 1)
+                           (// (- self.ui.total-words self.ui.starting-word 1) self.ui.words-in-line))))
     (setv self.ui.starting-word
       (max 0
         (min self.ui.starting-word
