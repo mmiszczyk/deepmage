@@ -52,7 +52,8 @@
                       (get 0)
                       (+ 1)))
       (for [i (range begin end)]
-        (.append self.chunks (get self.reader.chunks i))))
+        (when (< i (len self.reader.chunks))
+          (.append self.chunks (get self.reader.chunks i)))))
       (for [chunk self.chunks] ~form)))
 
 (defclass View [object]
@@ -142,10 +143,13 @@
     (, (.get-bit-coords self (* word-idx self.wordsize))
        (.get-bit-coords self (- (* (+ word-idx 1) self.wordsize) 1))))
   (defn --getitem-- [self word-number]
-    (setv ret [])
-    (for-bit-in-word word-number
-      (unless (= bit None) (.append ret bit)))
-    ret)
+    (if (<= word-number (.get-wordcount self))
+      (do
+        (setv ret [])
+        (for-bit-in-word word-number
+          (unless (= bit None) (.append ret bit)))
+        ret)
+        []))
   (defn --setitem-- [self word-number value]
     (for-bit-in-word word-number
       (set-bit (get value i))))
