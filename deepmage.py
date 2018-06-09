@@ -24,7 +24,8 @@ class UI(object):
     UI_control_keys = {Screen.KEY_F2:  lambda self: self.mode_toggle(),
                        Screen.KEY_F3:  lambda self: self.change_wordsize(),
                        Screen.KEY_F5:  lambda self: self.reader.save(),
-                       Screen.KEY_F10: lambda self: exit(0)}
+                       # ugly hack to not kill Gnome Terminal when exiting
+                       Screen.KEY_F10: lambda self: (_ for _ in ()).throw(KeyboardInterrupt)}
 
     hex_alphabet = {ord(x) for x in '0123456789abcdefABCDEF'}
     bin_alphabet = {ord(x) for x in '01'}
