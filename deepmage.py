@@ -7,6 +7,8 @@ import hy
 import bitstream_reader
 import cursor
 import argparse
+import os
+import errno
 
 BIT_MODE = 1
 HEX_MODE = 4
@@ -215,6 +217,15 @@ parser = argparse.ArgumentParser("deepmage")
 parser.add_argument('filename', metavar='file', type=str, help='Path to a file to edit')
 args = parser.parse_args()
 
+try:
+    if os.stat(args.filename).st_size == 0:
+        raise EOFError
+except FileNotFoundError:
+    print("{}: no such file or directory".format(args.filename))
+    exit(errno.ENOENT)
+except EOFError:
+    print("{}: file is empty".format(args.filename))
+    exit(errno.ENODATA)
 
 with open(args.filename, 'r+b') as f:
 
