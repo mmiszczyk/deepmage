@@ -232,5 +232,7 @@ with open(args.filename, 'r+b') as f:
     def main_loop(screen):
         UI(screen, f)
 
-
-    Screen.wrapper(main_loop, catch_interrupt=True)
+    try:
+        Screen.wrapper(main_loop)
+    except KeyboardInterrupt:
+        exit(0)
