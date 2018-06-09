@@ -51,7 +51,16 @@
                                  (get self.coords 1)))]
            [Screen.KEY-END
             (setv self.coords (, (- self.ui.words-in-line 1)
-                                 (get self.coords 1)))])))
+                                 (get self.coords 1)))]
+           [Screen.KEY-PAGE-UP
+            (do
+              (setv self.ui.starting-word (- self.ui.starting-word self.ui.words-in-view))
+              (setv self.ui.view-changed True))]
+           [Screen.KEY-PAGE-DOWN
+            (do
+              (setv self.ui.starting-word (+ self.ui.starting-word self.ui.words-in-view))
+              (setv self.ui.view-changed True))
+            (< self.ui.starting-word (- self.ui.total-words self.ui.words-in-view))])))
   (defn word-idx-in-view [self]
     (word-idx self.coords))
   (defn old-word-idx-in-view [self]
