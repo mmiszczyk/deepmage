@@ -45,7 +45,6 @@ class UI(object):
         self.words_in_view = self.lines * self.words_in_line
         self.view = None
         self.view_changed = True
-        self.write_buffer = []
         self.screen.print_at(self.make_header_text(self.file.name),
                              0, 0,
                              Screen.COLOUR_CYAN,
@@ -136,7 +135,6 @@ class UI(object):
         except KeyError:
             pass
         self.cursor.handle_key_event(k)
-        self.write_buffer = []
 
     def main_loop_internal(self):
         while True:
