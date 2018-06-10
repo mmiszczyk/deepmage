@@ -103,4 +103,12 @@
     (try
       ((get self.keys k))
       (except [KeyError] (return)))  ; if no keypress was recognized, we return early
-      (.cursor-moved self)))
+      (.cursor-moved self))
+  (defn get-human-readable-position-data [self]
+    (-> "{}/{} {}"
+        (.format
+          (+ (.word-idx-in-file self) 1)
+          self.ui.total-words
+          self.coords)
+        (+
+          (* " " self.ui.screen.width)))))

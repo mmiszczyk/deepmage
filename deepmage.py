@@ -88,8 +88,7 @@ class UI(object):
         return pad + text + pad
 
     def handle_cursor_move(self):
-        self.screen.print_at(('{}/{} {}' + ' ' * self.screen.width).format(
-            self.cursor.word_idx_in_file() + 1, self.total_words, self.cursor.coords), 0, self.screen.height - 2)
+        self.screen.print_at(self.cursor.get_human_readable_position_data(), 0, self.screen.height - 2)
         try:
             self.screen.print_at(self.representation(self.view[self.cursor.old_word_idx_in_view()]),
                                  self.cursor.old_coords[0] * (self.chars_per_word + 1), self.cursor.old_coords[1] + 1,
