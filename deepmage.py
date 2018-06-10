@@ -125,16 +125,11 @@ class UI(object):
             self.screen.refresh()
 
     def handle_keyboard_events(self, k):
-        if k in self.hex_alphabet and self.mode == HEX_MODE:
-            self.write_buffer.append(k)
-            if len(self.write_buffer) == self.chars_per_word:
-                bits_to_write = bitstring.ConstBitArray('0x'+''.join([chr(x) for x in self.write_buffer]))
-                self.reader[self.cursor.word_idx_in_file()] = bits_to_write[::-1][:self.reader.get_wordsize()][::-1]
-                self.write_buffer = []
-                self.view_changed = True
-                k = Screen.KEY_RIGHT
-            else:
-                return
+        try:
+            self.cursor.write_at_cursor(k)
+            return
+        except ValueError:
+            pass
         try:
             self.UI_control_keys[k](self)
             return

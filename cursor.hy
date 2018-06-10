@@ -1,5 +1,6 @@
 (import [asciimatics.event [KeyboardEvent]])
 (import [asciimatics.screen [Screen]])
+(import bitstring)
 
 (defmacro word-idx [coords]
   `(do
@@ -28,6 +29,8 @@
     (setv self.coords (, 0 0))
     (setv self.old-coords self.coords)
     (setv self.cursor-at-word 0)
+    (setv self.alphabet "1234567890abcdef")
+    (setv self.write-buffer [])
     (setv self.keys
       (keymap               ; we execute a function corresponding to a key
           [Screen.KEY-RIGHT   ; if a condition is satisfied
@@ -68,6 +71,7 @@
   (defn word-idx-in-file [self]
     (+ self.ui.starting-word (word-idx self.coords)))
   (defn cursor-moved [self]
+    (setv self.write-buffer [])
     (setv old-start self.ui.starting-word)
     (cond
       [(>= (get self.coords 0) self.ui.words-in-line)  ; checking the line boundaries
@@ -110,5 +114,16 @@
           (+ (.word-idx-in-file self) 1)
           self.ui.total-words
           self.coords)
-        (+
-          (* " " self.ui.screen.width)))))
+        (+ (* " " self.ui.screen.width))))
+  (defn write-at-cursor [self char]
+    (unless (in (chr char) self.alphabet) (raise (ValueError "Not a hex digit")))
+    (.append self.write-buffer char)
+    (when (= (len self.write-buffer) self.ui.chars-per-word)
+      (assoc self.ui.reader (.word-idx-in-file self)
+        (-> (bitstring.ConstBitArray
+              (+ "0x" (.join "" (list-comp (chr x) [x self.write-buffer]))))
+            (get (slice None None -1))
+            (get (slice None (.get-wordsize self.ui.reader)))
+            (get (slice None None -1))))
+      (setv self.ui.view-changed True)
+      (.handle-key-event self Screen.KEY-RIGHT))))
