@@ -33,33 +33,33 @@
     (setv self.write-buffer [])
     (setv self.keys
       (keymap               ; we execute a function corresponding to a key
-          [Screen.KEY-RIGHT   ; if a condition is satisfied
+          [Screen.*key-right*   ; if a condition is satisfied
            (setv self.coords (, (+ (get self.coords 0) 1)
                                 (get self.coords 1)))
            (< (.word-idx-in-file self) (- self.ui.total-words 1))]
-          [Screen.KEY-LEFT
+          [Screen.*key-left*
            (setv self.coords (, (- (get self.coords 0) 1)
                                 (get self.coords 1)))
            (> (.word-idx-in-file self) 0)]
-          [Screen.KEY-DOWN
+          [Screen.*key-down*
            (setv self.coords (, (get self.coords 0)
                                 (+ (get self.coords 1) 1)))
            (< (.word-idx-in-file self) (- self.ui.total-words self.ui.words-in-line))]
-          [Screen.KEY-UP
+          [Screen.*key-up*
            (setv self.coords (, (get self.coords 0)
                                 (- (get self.coords 1) 1)))
            (> (.word-idx-in-file self) (- self.ui.words-in-line 1))]
-           [Screen.KEY-HOME
+           [Screen.*key-home*
             (setv self.coords (, 0
                                  (get self.coords 1)))]
-           [Screen.KEY-END
+           [Screen.*key-end*
             (setv self.coords (, (- self.ui.words-in-line 1)
                                  (get self.coords 1)))]
-           [Screen.KEY-PAGE-UP
+           [Screen.*key-page-up*
             (do
               (setv self.ui.starting-word (- self.ui.starting-word self.ui.words-in-view))
               (setv self.ui.view-changed True))]
-           [Screen.KEY-PAGE-DOWN
+           [Screen.*key-page-down*
             (do
               (setv self.ui.starting-word (+ self.ui.starting-word self.ui.words-in-view))
               (setv self.ui.view-changed True))
@@ -126,7 +126,7 @@
             (get (slice None (.get-wordsize self.ui.reader)))
             (get (slice None None -1))))
       (setv self.ui.view-changed True)
-      (.handle-key-event self Screen.KEY-RIGHT))))
+      (.handle-key-event self Screen.*key-right*))))
 
 (defclass BitCursor [BasicCursor]
   (defn --init-- [self ui &optional coords]
