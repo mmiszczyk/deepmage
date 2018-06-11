@@ -24,9 +24,9 @@
     [tup key-tuples]))
 
 (defclass BasicCursor [object]
-  (defn --init-- [self ui]
+  (defn --init-- [self ui &optional coords]
     (setv self.ui ui)
-    (setv self.coords (, 0 0))
+    (setv self.coords (if coords coords (, 0 0)))
     (setv self.old-coords self.coords)
     (setv self.cursor-at-word 0)
     (setv self.alphabet "1234567890abcdef")
@@ -127,3 +127,8 @@
             (get (slice None None -1))))
       (setv self.ui.view-changed True)
       (.handle-key-event self Screen.KEY-RIGHT))))
+
+(defclass BitCursor [BasicCursor]
+  (defn --init-- [self ui &optional coords]
+    (.--init-- (super BitCursor self) ui)
+    (setv self.alphabet "01")))
