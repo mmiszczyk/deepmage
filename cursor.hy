@@ -130,5 +130,5 @@
 
 (defclass BitCursor [BasicCursor]
   (defn --init-- [self ui &optional coords]
-    (.--init-- (super BitCursor self) ui)
-    (setv self.alphabet "01")))
+    (.--init-- (super BitCursor self) ui (when coords coords))
+    (setv self.alphabet "01"))) ; TODO: moving the cursor by bits, not words

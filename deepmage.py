@@ -147,6 +147,7 @@ class UI(object):
         curr_word = self.cursor.word_idx_in_file()
         self.view_changed = True
         self.mode = BIT_MODE if self.mode == HEX_MODE else HEX_MODE
+        cursor_type = cursor.BitCursor if self.mode == BIT_MODE else cursor.BasicCursor
         self.representation = bit_representation if self.mode == BIT_MODE else hex_representation
         self.chars_per_word = int(math.ceil(self.reader.get_wordsize() / self.mode))
         self.words_in_line = self.calculate_words_in_line()
@@ -154,6 +155,7 @@ class UI(object):
                               (curr_word // self.words_in_line) % self.lines)
         self.words_in_view = self.lines * self.words_in_line
         self.starting_word = curr_word - (curr_word % self.words_in_view)
+        self.cursor = cursor_type(self, self.cursor.coords)
 
     def change_wordsize(self):
         self.screen.print_at(WORDSIZE_PROMPT, 0, self.screen.height - 2)
