@@ -23,6 +23,13 @@
         ~(second tup)))
     [tup key-tuples]))
 
+(defmacro basic-cursor-print [coords view-indexing-method attr]
+  `(.print-at self.ui.screen
+    (self.ui.representation (get self.ui.view (~view-indexing-method)))
+    (* (get ~coords 0) (+ self.ui.chars-per-word 1))
+    (+ (get ~coords 1) 1)
+    :attr ~attr))
+
 (defclass BasicCursor [object]
   (defn --init-- [self ui &optional coords]
     (setv self.ui ui)
@@ -103,6 +110,13 @@
             (- self.ui.total-words self.ui.words-in-line)
             (% self.ui.starting-word self.ui.words-in-line)))))
     (unless (= old-start self.ui.starting-word) (setv self.ui.view-changed True)))
+    (defn highlight [self]
+      (try
+        (do
+          (basic-cursor-print self.old-coords self.old-word-idx-in-view Screen.*a-normal*)
+          (basic-cursor-print self.coords     self.word-idx-in-view     Screen.*a-reverse*))
+        (except [IndexError] None))
+      (setv self.old-coords None))
   (defn handle-key-event [self k]
     (try
       ((get self.keys k))

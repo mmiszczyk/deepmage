@@ -88,16 +88,7 @@ class UI(object):
 
     def handle_cursor_move(self):
         self.screen.print_at(self.cursor.get_human_readable_position_data(), 0, self.screen.height - 2)
-        try:
-            self.screen.print_at(self.representation(self.view[self.cursor.old_word_idx_in_view()]),
-                                 self.cursor.old_coords[0] * (self.chars_per_word + 1), self.cursor.old_coords[1] + 1,
-                                 attr=Screen.A_NORMAL)
-            self.screen.print_at(self.representation(self.view[self.cursor.word_idx_in_view()]),
-                                 self.cursor.coords[0] * (self.chars_per_word + 1), self.cursor.coords[1] + 1,
-                                 attr=Screen.A_REVERSE)
-        except IndexError:
-            pass
-        self.cursor.old_coords = None
+        self.cursor.highlight()
 
     def handle_screen_resize(self):
         self.chars_per_word = int(math.ceil(self.reader.get_wordsize() / self.mode))
