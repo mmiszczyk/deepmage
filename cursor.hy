@@ -142,14 +142,23 @@
       (setv self.ui.view-changed True)
       (.handle-key-event self Screen.*key-right*))))
 
-(defclass BitCursor [BasicCursor] ; TODO: highlight bit cursor visually, handle writing to it
+(defmacro bit-cursor-print [coords bit-idx view-indexing-method attr]
+  `(.print-at self.ui.screen
+    (get (self.ui.representation (get self.ui.view (~view-indexing-method))) ~bit-idx)
+    (+ (* (get ~coords 0) (+ self.ui.chars-per-word 1)) ~bit-idx)
+    (+ (get ~coords 1) 1)
+    :attr ~attr))
+
+(defclass BitCursor [BasicCursor] ; TODO: handle writing to bit cursor
   (defn --init-- [self ui &optional coords]
     (.--init-- (super BitCursor self) ui (when coords coords))
     (setv self.alphabet "01")
     (setv self.bit-idx 0)
+    (setv self.old-bit-idx 0)
     (.update self.keys (keymap
       [Screen.*key-right*
        (do
+         (setv self.old-bit-idx self.bit-idx)
          (setv self.bit-idx (+ self.bit-idx 1))
          (when (>= self.bit-idx (.get-wordsize self.ui.reader))
            (do
@@ -160,6 +169,7 @@
                (setv self.bit-idx (- (.get-wordsize self.ui.reader) 1))))))]
       [Screen.*key-left*
        (do
+         (setv self.old-bit-idx self.bit-idx)
          (setv self.bit-idx (- self.bit-idx 1))
          (when (< self.bit-idx 0)
            (do
@@ -176,4 +186,14 @@
           self.ui.total-words
           (.get-wordsize self.ui.reader)
           self.coords)
-        (+ (* " " self.ui.screen.width)))))
+        (+ (* " " self.ui.screen.width))))
+  (defn highlight [self]
+      (try
+        (do
+          (if (or (= self.coords self.old-coords) (= self.old-coords None))
+            (bit-cursor-print self.old-coords self.old-bit-idx self.old-word-idx-in-view Screen.*a-normal*)
+            (basic-cursor-print self.old-coords self.old-word-idx-in-view Screen.*a-normal*))
+          (bit-cursor-print self.coords     self.bit-idx     self.word-idx-in-view     Screen.*a-reverse*))
+        (except [IndexError] None))
+      (setv self.old-coords None)
+      (setv self.old-bit-idx 0)))
