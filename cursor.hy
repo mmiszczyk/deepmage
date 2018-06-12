@@ -151,28 +151,29 @@
       [Screen.*key-right*
        (do
          (setv self.bit-idx (+ self.bit-idx 1))
-         (when (and
-                 (>= self.bit-idx (.get-wordsize self.ui.reader))
-                 (<  (.word-idx-in-file self) (- self.ui.total-words 1)))
-               (do
-                 (setv self.bit-idx 0)
-                 (setv self.coords (, (+ (get self.coords 0) 1)
-                                      (get self.coords 1))))))]
+         (when (>= self.bit-idx (.get-wordsize self.ui.reader))
+           (do
+             (setv self.bit-idx 0)
+             (if (<  (.word-idx-in-file self) (- self.ui.total-words 1))
+               (setv self.coords (, (+ (get self.coords 0) 1)
+                                    (get self.coords 1)))
+               (setv self.bit-idx (- (.get-wordsize self.ui.reader) 1))))))]
       [Screen.*key-left*
        (do
          (setv self.bit-idx (- self.bit-idx 1))
-         (when (and
-                 (< self.bit-idx 0)
-                 (> (.word-idx-in-file self) 0))
-               (do
-                 (setv self.bit-idx (- (.get-wordsize self.ui.reader) 1))
-                 (setv self.coords (, (- (get self.coords 0) 1)
-                                      (get self.coords 1))))))])))
+         (when (< self.bit-idx 0)
+           (do
+             (setv self.bit-idx (- (.get-wordsize self.ui.reader) 1))
+             (if (> (.word-idx-in-file self) 0)
+               (setv self.coords (, (- (get self.coords 0) 1)
+                                  (get self.coords 1)))
+               (setv self.bit-idx 0)))))])))
   (defn get-human-readable-position-data [self]
-    (-> "{}/{}[{}] {}"
+    (-> "{}[{}]/{}[{}] {}"
         (.format
           (+ (.word-idx-in-file self) 1)
+          (+ self.bit-idx 1)
           self.ui.total-words
-          self.bit-idx
+          (.get-wordsize self.ui.reader)
           self.coords)
         (+ (* " " self.ui.screen.width)))))
