@@ -39,7 +39,7 @@
     (setv self.alphabet "1234567890abcdef")
     (setv self.write-buffer [])
     (setv self.keys
-      (keymap               ; we execute a function corresponding to a key
+      (keymap                   ; we execute a function corresponding to a key
           [Screen.*key-right*   ; if a condition is satisfied
            (setv self.coords (, (+ (get self.coords 0) 1)
                                 (get self.coords 1)))
@@ -193,7 +193,7 @@
           (if (or (= self.coords self.old-coords) (= self.old-coords None))
             (bit-cursor-print self.old-coords self.old-bit-idx self.old-word-idx-in-view Screen.*a-normal*)
             (basic-cursor-print self.old-coords self.old-word-idx-in-view Screen.*a-normal*))
-          (bit-cursor-print self.coords     self.bit-idx     self.word-idx-in-view     Screen.*a-reverse*))
+          (bit-cursor-print self.coords self.bit-idx self.word-idx-in-view Screen.*a-reverse*))
         (except [IndexError] None))
       (setv self.old-coords None)
       (setv self.old-bit-idx 0))
