@@ -149,7 +149,7 @@
     (+ (get ~coords 1) 1)
     :attr ~attr))
 
-(defclass BitCursor [BasicCursor] ; TODO: handle writing to bit cursor
+(defclass BitCursor [BasicCursor]
   (defn --init-- [self ui &optional coords]
     (.--init-- (super BitCursor self) ui (when coords coords))
     (setv self.alphabet "01")
@@ -196,4 +196,11 @@
           (bit-cursor-print self.coords     self.bit-idx     self.word-idx-in-view     Screen.*a-reverse*))
         (except [IndexError] None))
       (setv self.old-coords None)
-      (setv self.old-bit-idx 0)))
+      (setv self.old-bit-idx 0))
+  (defn write-at-cursor [self char]
+    (unless (in (chr char) self.alphabet) (raise (ValueError "Not a binary digit")))
+    (setv word (get self.ui.reader (.word-idx-in-file self)))
+    (assoc word self.bit-idx (if (= (chr char) "1") True False))
+    (assoc self.ui.reader (.word-idx-in-file self) word)
+    (setv self.ui.view-changed True)
+    (.handle-key-event self Screen.*key-right*)))
