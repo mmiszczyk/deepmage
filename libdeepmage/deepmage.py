@@ -12,7 +12,8 @@ import math
 import os
 import errno
 
-import hy
+# noinspection PyUnresolvedReferences
+import hy  # warning suppressed because that import is needed to run hy code if it's not compiled to .pyc yet
 import bitstring
 from asciimatics.screen import Screen
 from asciimatics.event import KeyboardEvent
@@ -29,6 +30,7 @@ WORDSIZE_HELP   = "<ENTER> confirm | <ESC> cancel"
 KEYS_HELP       = "<F2> Bit/Hex mode | <F3> Change wordsize | <F5> Save | <F10> Exit"
 
 loop = None
+
 
 class UI(object):
 
