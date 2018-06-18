@@ -28,6 +28,7 @@ WORDSIZE_PROMPT = "New wordsize (in bits): "
 WORDSIZE_HELP   = "<ENTER> confirm | <ESC> cancel"
 KEYS_HELP       = "<F2> Bit/Hex mode | <F3> Change wordsize | <F5> Save | <F10> Exit"
 
+loop = None
 
 class UI(object):
 
@@ -105,7 +106,7 @@ class UI(object):
         self.words_in_line = self.calculate_words_in_line()
         self.lines = self.screen.height - 2  # 1 line for header and 1 for footer
         self.words_in_view = self.lines * self.words_in_line
-        self.screen = Screen.wrapper(main_loop)
+        self.screen = Screen.wrapper(loop)
         self.screen.clear()
 
     def redraw_if_needed(self):
@@ -209,14 +210,15 @@ def bit_representation(word):
 
 
 def main(filename):
+    global loop
     try:
         if os.stat(filename).st_size == 0:
             raise EOFError
     except FileNotFoundError:
-        print("{}: no such file or directory".format(args.filename))
+        print("{}: no such file or directory".format(filename))
         exit(errno.ENOENT)
     except EOFError:
-        print("{}: file is empty".format(args.filename))
+        print("{}: file is empty".format(filename))
         exit(errno.ENODATA)
 
     with open(filename, 'r+b') as f:
@@ -224,7 +226,8 @@ def main(filename):
         def main_loop(screen):
             UI(screen, f)
 
+        loop = main_loop
         try:
-            Screen.wrapper(main_loop)
+            Screen.wrapper(loop)
         except KeyboardInterrupt:
             exit(0)
