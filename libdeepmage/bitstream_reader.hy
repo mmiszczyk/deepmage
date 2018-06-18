@@ -1,3 +1,13 @@
+;;;;;;;;;;;;;;;;;;;;;;;
+; This file is a part ;
+;   of the deepmage   ;
+;  project, released  ;
+; under the GNU GPL 3 ;
+;      license        ;
+;  (see the COPYING   ;
+;  file for details)  ;
+;;;;;;;;;;;;;;;;;;;;;;;
+
 (import bitstring)
 (import math)
 
