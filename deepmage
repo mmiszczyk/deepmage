@@ -13,7 +13,7 @@
 import argparse
 import libdeepmage.deepmage
 
-parser = argparse.ArgumentParser("libdeepmage")
+parser = argparse.ArgumentParser("deepmage")
 parser.add_argument('filename', metavar='file', type=str, help='Path to a file to edit')
 args = parser.parse_args()
 
