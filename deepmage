@@ -1,0 +1,12 @@
+#!/usr/bin/env python3
+
+import argparse
+import os
+import errno
+import libdeepmage.deepmage
+
+parser = argparse.ArgumentParser("libdeepmage")
+parser.add_argument('filename', metavar='file', type=str, help='Path to a file to edit')
+args = parser.parse_args()
+
+libdeepmage.deepmage.main(args.filename)
