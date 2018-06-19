@@ -30,6 +30,12 @@ something different than the usual 8 bits. It supports large file
 by only keeping in memory the parts of the file that have unsaved
 changes or are currently displayed to the user.
 
+Dependencies
+------------
++ asciimatics
++ bitstring
++ hy
+
 How to use
 ----------
 ```bash
