@@ -18,11 +18,46 @@ packed GSM alphabet) and with codecs (variable-length bitfields).
 Status
 ------
 
-Deepmage is at the very early stage of development. So far, it
-can read files (while only keeping what's needed in memory),
-interpret their contents at different word sizes and display
-them either as hex digits or bits. Most of the options aren't
-yet exposed in the user interface and have to be accessed by
-modifying the code. The code also lacks comments and
-documentation. All of those things are, of course, coming soon -
-so stay patient.
+Deepmage is currently in the alpha version. The code needs some
+refactoring, there's not real documentation and few comments
+and it works really slow if your terminal windows is big - but
+the basic functionality is there.
+
+Deepmage allows you to view and edit files like in a normal hex
+editor, but you can also directly edit bits or change word (note
+that 'word' here means a basic unit, not machine word) size to
+something different than the usual 8 bits. It supports large file
+by only keeping in memory the parts of the file that have unsaved
+changes or are currently displayed to the user.
+
+How to use
+----------
+```bash
+chmod +x deepmage
+./deepmage [PATH_TO_FILE]
+```
+
+Use arrow keys, page up/page down and home/end to navigate.
+
+Switch between hex and bit modes with F2.
+
+Save changes with F5.
+
+Exit with F10 or CTRL+C.
+
+TODO
+----
+
+### Planned
++ tools for dumping and parsing bitstreams (for use with Unix shell
+scripts)
++ fixing any bugs that will come out during testing
+
+### Maybe
++ performance improvements
++ UI code refactoring
++ two-column display with approximate ASCII representation
+
+### Long-term (unlikely)
++ parsing user-defined structure with words of different length,
+including variable-length bitfields
