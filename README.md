@@ -38,6 +38,19 @@ Dependencies
 
 How to use
 ----------
+You can download this repo
+```bash
+git clone https://github.com/mmiszczyk/deepmage
+```
+
+or get deepmage from PyPi
+
+```bash
+pip3 install deepmage
+```
+
+Then, to use the editor:
+
 ```bash
 chmod +x deepmage
 ./deepmage [PATH_TO_FILE]
