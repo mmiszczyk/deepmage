@@ -10,6 +10,7 @@
 #  file for details)  #
 #######################
 
+# noinspection PyUnresolvedReferences
 import hy
 import argparse
 import libdeepmage.bitstream_reader
