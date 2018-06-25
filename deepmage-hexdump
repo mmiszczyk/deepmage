@@ -17,10 +17,17 @@ from libdeepmage.deepmage import hex_representation, bit_representation
 
 parser = argparse.ArgumentParser("deepmage-hexdump")
 parser.add_argument('filename', metavar='file', type=str, help='Path to a file to edit')
+parser.add_argument('-w', '--wordsize', metavar='wordsize', type=int, default=8,
+                    help='Size of words (in bits)')
+parser.add_argument('-c', '--cols', metavar='cols', type=int, default=16)
+parser.add_argument('-b', '--bits', action='store_true')
 args = parser.parse_args()
+
+representation = bit_representation if args.bits else hex_representation
 
 with open(args.filename, 'rb') as f:
     reader = libdeepmage.bitstream_reader.FileReader(f, 1024)
-    for i in range(0, reader.get_wordcount(), 16):
-        view = reader.get_view(i, 16)
-        print(''.join([hex_representation(view[j]) + ' ' for j in range(16)]))
+    reader.set_wordsize(args.wordsize)
+    for i in range(0, reader.get_wordcount(), args.cols):
+        view = reader.get_view(i, args.cols)
+        print(''.join([representation(view[j]) + ' ' for j in range(args.cols)]))
