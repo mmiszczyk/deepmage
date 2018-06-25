@@ -197,7 +197,7 @@ class UI(object):
 
 def hex_representation(word):
     if word is None or len(word) == 0:
-        return []
+        return ''
     if not len(word) % 4:
         ret = word
     else:
