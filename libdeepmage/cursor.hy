@@ -10,7 +10,7 @@
 
 (import [asciimatics.event [KeyboardEvent]])
 (import [asciimatics.screen [Screen]])
-(import bitstring)
+(import [. [parser]])
 
 (defmacro word-idx [coords]
   `(do
@@ -144,11 +144,7 @@
     (.append self.write-buffer char)
     (when (= (len self.write-buffer) self.ui.chars-per-word)
       (assoc self.ui.reader (.word-idx-in-file self)
-        (-> (bitstring.ConstBitArray
-              (+ "0x" (.join "" (list-comp (chr x) [x self.write-buffer]))))
-            (get (slice None None -1))
-            (get (slice None (.get-wordsize self.ui.reader)))
-            (get (slice None None -1))))
+        (parser.from-hex-buf self.write-buffer (.get-wordsize self.ui.reader)))
       (setv self.ui.view-changed True)
       (.handle-key-event self Screen.*key-right*))))
 
