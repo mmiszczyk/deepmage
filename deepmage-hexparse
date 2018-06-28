@@ -1,0 +1,50 @@
+#!/usr/bin/env python3
+
+#######################
+# This file is a part #
+#   of the deepmage   #
+#  project, released  #
+# under the GNU GPL 3 #
+#      license        #
+#  (see the COPYING   #
+#  file for details)  #
+#######################
+
+# noinspection PyUnresolvedReferences
+import hy
+import argparse
+import sys
+import fileinput
+import math
+from libdeepmage.parser import from_hex_buf, from_bit_buf
+
+parser = argparse.ArgumentParser("deepmage-hexdump")
+parser.add_argument('infile', metavar='input-filename', nargs='?', default=None, type=str,
+                    help='Path to a hexdump file')
+parser.add_argument('outfile', metavar='output-filename', type=str,
+                    help='Path to an output file')
+parser.add_argument('-w', '--wordsize', metavar='wordsize', type=int, default=8,
+                    help='Size of words (in bits)')
+parser.add_argument('-c', '--cols', metavar='cols', type=int, default=16)
+parser.add_argument('--write_buffer_size', metavar='bytes', type=int, default=1024)
+parser.add_argument('-b', '--bits', action='store_true')
+args = parser.parse_args()
+
+string_parser = from_bit_buf if args.bits else from_hex_buf
+chars_per_word = int(math.ceil(args.wordsize / (1 if args.bits else 4)))
+
+with open(args.outfile, 'w+b') as outfile:
+    read_buf = []
+    write_buf = bytearray()
+    for line in fileinput.input(args.infile if args.infile else sys.stdin):
+        for char in line:
+            if char.isspace():
+                continue
+            read_buf.append(char)
+            if len(read_buf) == chars_per_word:
+                write_buf.extend(string_parser(read_buf, args.wordsize).bytes)
+                read_buf = []
+                if len(write_buf) == args.write_buffer_size:
+                    outfile.write(write_buf)
+                    write_buf = bytearray()
+    outfile.write(write_buf)
