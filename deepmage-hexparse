@@ -40,7 +40,7 @@ alphabet = bit_alphabet if args.bits else hex_alphabet
 with open(args.outfile, 'w+b') as outfile:
     read_buf = []
     write_buf = bytearray()
-    for line in fileinput.input(args.infile if args.infile else sys.stdin):
+    for line in fileinput.input(args.infile if args.infile else '-'):
         for char in line:
             if char.isspace():
                 continue
