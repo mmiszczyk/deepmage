@@ -10,12 +10,13 @@
 #  file for details)  #
 #######################
 
+import sys
+import math
 # noinspection PyUnresolvedReferences
 import hy
 import argparse
-import sys
 import fileinput
-import math
+# noinspection PyUnresolvedReferences
 from libdeepmage.parser import from_hex_buf, from_bit_buf
 
 parser = argparse.ArgumentParser("deepmage-hexdump")
