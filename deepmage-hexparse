@@ -12,12 +12,13 @@
 
 import sys
 import math
+import errno
 # noinspection PyUnresolvedReferences
 import hy
 import argparse
 import fileinput
 # noinspection PyUnresolvedReferences
-from libdeepmage.parser import from_hex_buf, from_bit_buf
+from libdeepmage.parser import from_hex_buf, from_bit_buf, hex_alphabet, bit_alphabet
 
 parser = argparse.ArgumentParser("deepmage-hexdump")
 parser.add_argument('infile', metavar='input-filename', nargs='?', default=None, type=str,
@@ -29,10 +30,12 @@ parser.add_argument('-w', '--wordsize', metavar='wordsize', type=int, default=8,
 parser.add_argument('-c', '--cols', metavar='cols', type=int, default=16)
 parser.add_argument('--write_buffer_size', metavar='bytes', type=int, default=1024)
 parser.add_argument('-b', '--bits', action='store_true')
+parser.add_argument('-i', '--ignore-errors', action='store_true', help="Skip invalid characters")
 args = parser.parse_args()
 
 string_parser = from_bit_buf if args.bits else from_hex_buf
 chars_per_word = int(math.ceil(args.wordsize / (1 if args.bits else 4)))
+alphabet = bit_alphabet if args.bits else hex_alphabet
 
 with open(args.outfile, 'w+b') as outfile:
     read_buf = []
@@ -41,6 +44,14 @@ with open(args.outfile, 'w+b') as outfile:
         for char in line:
             if char.isspace():
                 continue
+            if char.lower() not in alphabet:
+                if args.ignore_errors:
+                    continue
+                print('ERROR: Malformed input file - {} is not a valid {} digit'.format(
+                    char,
+                    'binary' if args.bits else 'hexadecimal'
+                ))
+                sys.exit(errno.EINVAL)
             read_buf.append(char)
             if len(read_buf) == chars_per_word:
                 write_buf.extend(string_parser(read_buf, args.wordsize).bytes)

@@ -13,6 +13,9 @@
 (deftag b [ignored] "0b")
 (deftag h [ignored] "0x")
 
+(setv hex-alphabet "1234567890abcdef")
+(setv bit-alphabet "01")
+
 (defmacro parse [buf type]
   `(-> (bitstring.ConstBitArray
          (+ ~type (.join "" (list-comp

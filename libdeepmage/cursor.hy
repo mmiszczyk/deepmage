@@ -46,7 +46,7 @@
     (setv self.coords (if coords coords (, 0 0)))
     (setv self.old-coords self.coords)
     (setv self.cursor-at-word 0)
-    (setv self.alphabet "1234567890abcdef")
+    (setv self.alphabet parser.hex-alphabet)
     (setv self.write-buffer [])
     (setv self.keys
       (keymap                   ; we execute a function corresponding to a key
@@ -158,7 +158,7 @@
 (defclass BitCursor [BasicCursor]
   (defn --init-- [self ui &optional coords]
     (.--init-- (super BitCursor self) ui (when coords coords))
-    (setv self.alphabet "01")
+    (setv self.alphabet parser.bit-alphabet)
     (setv self.bit-idx 0)
     (setv self.old-bit-idx 0)
     (.update self.keys (keymap
