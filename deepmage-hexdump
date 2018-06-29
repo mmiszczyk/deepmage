@@ -10,9 +10,9 @@
 #  file for details)  #
 #######################
 
+import argparse
 # noinspection PyUnresolvedReferences
 import hy
-import argparse
 import libdeepmage.bitstream_reader
 from libdeepmage.deepmage import hex_representation, bit_representation
 
