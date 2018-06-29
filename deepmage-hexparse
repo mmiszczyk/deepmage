@@ -27,7 +27,6 @@ parser.add_argument('outfile', metavar='output-filename', type=str,
                     help='Path to an output file')
 parser.add_argument('-w', '--wordsize', metavar='wordsize', type=int, default=8,
                     help='Size of words (in bits)')
-parser.add_argument('-c', '--cols', metavar='cols', type=int, default=16)
 parser.add_argument('--write_buffer_size', metavar='bytes', type=int, default=1024)
 parser.add_argument('-b', '--bits', action='store_true')
 parser.add_argument('-i', '--ignore-errors', action='store_true', help="Skip invalid characters")
