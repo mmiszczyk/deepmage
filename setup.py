@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='deepmage',
-    version='0.1.1',
+    version='0.2',
     packages=['libdeepmage'],
     url='https://github.com/mmiszczyk/deepmage',
     license='GPL 3',
@@ -12,7 +12,7 @@ setup(
     install_requires=['hy', 'bitstring', 'asciimatics'],
     python_requires='>=3',
     package_data={'': '*.hy'},
-    scripts=('deepmage',),
+    scripts=('deepmage', 'deepmage-hexdump', 'deepmage-hexparse'),
     classifiers=('Programming Language :: Python :: 3',
                  'Programming Language :: Lisp',
                  'Operating System :: OS Independent',
