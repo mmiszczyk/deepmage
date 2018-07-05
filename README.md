@@ -52,7 +52,6 @@ pip3 install deepmage
 Then, to use the editor:
 
 ```bash
-chmod +x deepmage
 ./deepmage [PATH_TO_FILE]
 ```
 
@@ -63,6 +62,40 @@ Switch between hex and bit modes with F2.
 Save changes with F5.
 
 Exit with F10 or CTRL+C.
+
+Usage for dumping/parsing scripts:
+
+```bash
+usage: deepmage-hexdump [-h] [-w wordsize] [-c cols] [-b] file
+
+positional arguments:
+  file                  Path to a file to edit
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -w wordsize, --wordsize wordsize
+                        Size of words (in bits)
+  -c cols, --cols cols
+  -b, --bits
+```
+
+```bash
+usage: deepmage-hexdump [-h] [-w wordsize] [--write_buffer_size bytes] [-b]
+                        [-i]
+                        [input-filename] output-filename
+
+positional arguments:
+  input-filename        Path to a hexdump file
+  output-filename       Path to an output file
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -w wordsize, --wordsize wordsize
+                        Size of words (in bits)
+  --write_buffer_size bytes
+  -b, --bits
+  -i, --ignore-errors   Skip invalid characters
+  ```
 
 TODO
 ----
