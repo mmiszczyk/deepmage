@@ -101,14 +101,15 @@ TODO
 ----
 
 ### Planned
-+ tools for dumping and parsing bitstreams (for use with Unix shell
-scripts)
 + fixing any bugs that will come out during testing
 
 ### Maybe
 + performance improvements
 + UI code refactoring
 + two-column display with approximate ASCII representation
++ search and replace
++ endianness toggle
++ insert/delete bytes
 
 ### Long-term (unlikely)
 + parsing user-defined structure with words of different length,
