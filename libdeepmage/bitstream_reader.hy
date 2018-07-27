@@ -124,11 +124,10 @@
     (setv self.chunksize chunksize)
     (setv self.chunks (do
                        (.seek file 0)
-                       (list-comp
+                       (lfor
+                         i (range (int (math.ceil (/ self.filesize chunksize))))
                          (Chunk file
-                           (* i chunksize)
-                           chunksize)
-                         [i (range (int (math.ceil (/ self.filesize chunksize))))])))
+                           (* i chunksize) chunksize))))
     (setv self.wordsize 8)
     (setv self.view None))
   (defn set-wordsize [self wordsize]
@@ -176,10 +175,9 @@
     (setv self.view (View
       self
       first-word-idx
-      (list-comp
-        (get self word-number)
-        [word-number
-          (range first-word-idx
-            (+ first-word-idx number-of-words))])))
+      (lfor
+        word-number (range first-word-idx
+                      (+ first-word-idx number-of-words))
+        (get self word-number))))
     (.purge self)
     self.view))
