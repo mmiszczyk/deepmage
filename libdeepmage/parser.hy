@@ -18,11 +18,11 @@
 
 (defmacro parse [buf type]
   `(-> (bitstring.ConstBitArray
-         (+ ~type (.join "" (list-comp
+         (+ ~type (.join "" (lfor
+                              x ~buf
                               (if (= (type x) str)
                                 x
-                                (chr x))
-                              [x ~buf]))))
+                                (chr x))))))
        (get (slice None None -1))
        (get (slice None wordsize))
        (get (slice None None -1))))
