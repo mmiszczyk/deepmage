@@ -20,18 +20,18 @@
         (get ~coords 1)))))
 
 (defmacro keymap [&rest key-tuples]
-  (dict-comp
-    (first tup)
-    (if (> (len tup) 2)
-      `(fn []
-        (when ~(get tup 2)
-          (do
+    (dfor
+      tup key-tuples
+      [(first tup)
+        (if (> (len tup) 2)
+          `(fn []
+            (when ~(get tup 2)
+              (do
+                (setv self.old-coords self.coords)
+                ~(second tup))))
+          `(fn []
             (setv self.old-coords self.coords)
-            ~(second tup))))
-      `(fn []
-        (setv self.old-coords self.coords)
-        ~(second tup)))
-    [tup key-tuples]))
+            ~(second tup)))]))
 
 (defmacro basic-cursor-print [coords view-indexing-method attr]
   `(.print-at self.ui.screen
@@ -50,33 +50,33 @@
     (setv self.write-buffer [])
     (setv self.keys
       (keymap                   ; we execute a function corresponding to a key
-          [Screen.*key-right*   ; if a condition is satisfied
+          [Screen.KEY-RIGHT     ; if a condition is satisfied
            (setv self.coords (, (+ (get self.coords 0) 1)
                                 (get self.coords 1)))
            (< (.word-idx-in-file self) (- self.ui.total-words 1))]
-          [Screen.*key-left*
+          [Screen.KEY-LEFT
            (setv self.coords (, (- (get self.coords 0) 1)
                                 (get self.coords 1)))
            (> (.word-idx-in-file self) 0)]
-          [Screen.*key-down*
+          [Screen.KEY-DOWN
            (setv self.coords (, (get self.coords 0)
                                 (+ (get self.coords 1) 1)))
            (< (.word-idx-in-file self) (- self.ui.total-words self.ui.words-in-line))]
-          [Screen.*key-up*
+          [Screen.KEY-UP
            (setv self.coords (, (get self.coords 0)
                                 (- (get self.coords 1) 1)))
            (> (.word-idx-in-file self) (- self.ui.words-in-line 1))]
-           [Screen.*key-home*
+           [Screen.KEY-HOME
             (setv self.coords (, 0
                                  (get self.coords 1)))]
-           [Screen.*key-end*
+           [Screen.KEY-END
             (setv self.coords (, (- self.ui.words-in-line 1)
                                  (get self.coords 1)))]
-           [Screen.*key-page-up*
+           [Screen.KEY-PAGE-UP
             (do
               (setv self.ui.starting-word (- self.ui.starting-word self.ui.words-in-view))
               (setv self.ui.view-changed True))]
-           [Screen.*key-page-down*
+           [Screen.KEY-PAGE-DOWN
             (do
               (setv self.ui.starting-word (+ self.ui.starting-word self.ui.words-in-view))
               (setv self.ui.view-changed True))
@@ -123,8 +123,8 @@
     (defn highlight [self]
       (try
         (do
-          (basic-cursor-print self.old-coords self.old-word-idx-in-view Screen.*a-normal*)
-          (basic-cursor-print self.coords     self.word-idx-in-view     Screen.*a-reverse*))
+          (basic-cursor-print self.old-coords self.old-word-idx-in-view Screen.A-NORMAL)
+          (basic-cursor-print self.coords     self.word-idx-in-view     Screen.A-REVERSE))
         (except [IndexError] None))
       (setv self.old-coords None))
   (defn handle-key-event [self k]
@@ -146,7 +146,7 @@
       (assoc self.ui.reader (.word-idx-in-file self)
         (parser.from-hex-buf self.write-buffer (.get-wordsize self.ui.reader)))
       (setv self.ui.view-changed True)
-      (.handle-key-event self Screen.*key-right*))))
+      (.handle-key-event self Screen.KEY-RIGHT))))
 
 (defmacro bit-cursor-print [coords bit-idx view-indexing-method attr]
   `(.print-at self.ui.screen
@@ -162,7 +162,7 @@
     (setv self.bit-idx 0)
     (setv self.old-bit-idx 0)
     (.update self.keys (keymap
-      [Screen.*key-right*
+      [Screen.KEY-RIGHT
        (do
          (setv self.old-bit-idx self.bit-idx)
          (setv self.bit-idx (+ self.bit-idx 1))
@@ -173,7 +173,7 @@
                (setv self.coords (, (+ (get self.coords 0) 1)
                                     (get self.coords 1)))
                (setv self.bit-idx (- (.get-wordsize self.ui.reader) 1))))))]
-      [Screen.*key-left*
+      [Screen.KEY-LEFT
        (do
          (setv self.old-bit-idx self.bit-idx)
          (setv self.bit-idx (- self.bit-idx 1))
@@ -197,9 +197,9 @@
       (try
         (do
           (if (or (= self.coords self.old-coords) (= self.old-coords None))
-            (bit-cursor-print self.old-coords self.old-bit-idx self.old-word-idx-in-view Screen.*a-normal*)
-            (basic-cursor-print self.old-coords self.old-word-idx-in-view Screen.*a-normal*))
-          (bit-cursor-print self.coords self.bit-idx self.word-idx-in-view Screen.*a-reverse*))
+            (bit-cursor-print self.old-coords self.old-bit-idx self.old-word-idx-in-view Screen.A-NORMAL)
+            (basic-cursor-print self.old-coords self.old-word-idx-in-view Screen.A-NORMAL))
+          (bit-cursor-print self.coords self.bit-idx self.word-idx-in-view Screen.A-REVERSE))
         (except [IndexError] None))
       (setv self.old-coords None)
       (setv self.old-bit-idx 0))
@@ -209,4 +209,4 @@
     (assoc word self.bit-idx (if (= (chr char) "1") True False))
     (assoc self.ui.reader (.word-idx-in-file self) word)
     (setv self.ui.view-changed True)
-    (.handle-key-event self Screen.*key-right*)))
+    (.handle-key-event self Screen.KEY-RIGHT)))
