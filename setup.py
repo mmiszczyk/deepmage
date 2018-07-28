@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='deepmage',
-    version='0.2',
+    version='0.2.1',
     packages=['libdeepmage'],
     url='https://github.com/mmiszczyk/deepmage',
     license='GPL 3',
